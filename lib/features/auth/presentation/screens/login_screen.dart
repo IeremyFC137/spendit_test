@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spendit_test/features/auth/presentation/providers/login_form_provider.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:spendit_test/features/shared/shared.dart';
 
@@ -55,11 +57,13 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class _LoginForm extends StatelessWidget {
+class _LoginForm extends ConsumerWidget {
   const _LoginForm();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final loginForm = ref.watch(loginFormProvider);
+
     final textStyles = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
     return Padding(
@@ -69,14 +73,20 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 50),
           Text('Login', style: textStyles.titleLarge),
           const SizedBox(height: 50),
-          const CustomTextFormField(
+          CustomTextFormField(
             label: 'Correo',
             keyboardType: TextInputType.emailAddress,
+            onChanged: ref.read(loginFormProvider.notifier).onEmailChange,
+            errorMessage:
+                loginForm.isFormPosted ? loginForm.email.errorMessage : null,
           ),
           const SizedBox(height: 30),
-          const CustomTextFormField(
+          CustomTextFormField(
             label: 'Contraseña',
             obscureText: true,
+            onChanged: ref.read(loginFormProvider.notifier).onPasswordChanged,
+            errorMessage:
+                loginForm.isFormPosted ? loginForm.password.errorMessage : null,
           ),
           const SizedBox(height: 30),
           SizedBox(
@@ -85,7 +95,9 @@ class _LoginForm extends StatelessWidget {
             child: CustomFilledButton(
               text: 'Ingresar',
               buttonColor: colors.primary,
-              onPressed: () {},
+              onPressed: () {
+                ref.read(loginFormProvider.notifier).onFormSubmit();
+              },
             ),
           ),
           const SizedBox(height: 30), // Reemplaza el primer Spacer

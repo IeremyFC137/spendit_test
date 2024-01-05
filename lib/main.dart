@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spendit_test/config/router/app_router.dart';
-import 'package:spendit_test/config/theme/app_theme.dart';
-import 'package:spendit_test/features/auth/presentation/providers/theme_provider.dart';
+import 'package:spendit_test/config/config.dart';
+import 'package:spendit_test/features/auth/presentation/providers/providers.dart';
 
-void main() {
+void main() async {
+  await Environment.initEnvironment();
+
   runApp(const ProviderScope(child: MainApp()));
 }
 
