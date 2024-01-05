@@ -17,26 +17,31 @@ const appMenuItems = <MenuItem>[
   MenuItem(
       title: 'Home',
       subTitle: 'Pantalla principal',
-      link: '/home',
-      icon: Icons.add),
+      link: '/',
+      icon: Icons.home),
+  MenuItem(
+      title: 'Cambiar tema',
+      subTitle: 'Cambiar tema de la aplicación',
+      link: '/theme-changer',
+      icon: Icons.color_lens_outlined),
   MenuItem(
       title: 'Gastos',
       subTitle: 'Registro de gastos',
       link: '/gastos',
-      icon: Icons.smart_button_outlined),
+      icon: Icons.account_balance),
   MenuItem(
       title: 'Rendición',
       subTitle: 'Registro de rendición',
       link: '/rendicion',
-      icon: Icons.credit_card),
+      icon: Icons.money),
+  MenuItem(
+      title: 'Fondos',
+      subTitle: 'Registro de fondos',
+      link: '/fondos',
+      icon: Icons.monetization_on),
   MenuItem(
       title: 'Revisión',
       subTitle: 'Registro de revision',
       link: '/revision',
-      icon: Icons.refresh_rounded),
-  MenuItem(
-      title: 'Fondos',
-      subTitle: 'Registro de fondo',
-      link: '/fondos',
-      icon: Icons.info_outline),
+      icon: Icons.manage_accounts),
 ];

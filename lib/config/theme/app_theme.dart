@@ -2,23 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 var colorList = <Color>[
-  Color(0xFF1A237E),
-  Color.fromARGB(255, 14, 137, 141),
-  Colors.teal,
+  const Color.fromARGB(255, 14, 137, 141),
+  const Color(0xFF1A237E),
   Colors.green,
   const Color(0xFFB81414),
-  Colors.purple,
   Colors.deepPurple,
   Colors.orange,
-  Colors.pink,
   Colors.pinkAccent,
+];
+
+var nameList = <String>[
+  "Verde Leaf",
+  "Azul",
+  "Verde Claro",
+  "Rojo",
+  "Morado",
+  "Anaranjado",
+  "Rosa"
 ];
 
 class AppTheme {
   final int selectedColor;
+  final bool isDarkmode;
 
-  AppTheme({this.selectedColor = 0})
-      : assert(selectedColor >= 0, 'Selected color must be greater then 0'),
+  AppTheme({
+    this.selectedColor = 0,
+    this.isDarkmode = false,
+  })  : assert(selectedColor >= 0, 'Selected color must be greater then 0'),
         assert(selectedColor < colorList.length,
             'Selected color must be less or equal than ${colorList.length - 1}');
 
@@ -27,6 +37,7 @@ class AppTheme {
       ///* General
       useMaterial3: true,
       colorSchemeSeed: colorList[selectedColor],
+      brightness: isDarkmode ? Brightness.dark : Brightness.light,
       floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: colorList[selectedColor],
           foregroundColor: Colors.white,
@@ -55,6 +66,13 @@ class AppTheme {
       ///* Scaffold Background Color
       scaffoldBackgroundColor: colorList[selectedColor],
 
+      ///* Buttons
+      filledButtonTheme: FilledButtonThemeData(
+          style: ButtonStyle(
+              textStyle: MaterialStatePropertyAll(
+                  GoogleFonts.montserratAlternates()
+                      .copyWith(fontWeight: FontWeight.w700)))),
+
       ///* AppBar
       appBarTheme: AppBarTheme(
         color: colorList[selectedColor],
@@ -62,4 +80,9 @@ class AppTheme {
             fontSize: 20, fontWeight: FontWeight.w400, color: Colors.white),
         iconTheme: const IconThemeData(color: Colors.white),
       ));
+
+  AppTheme copyWith({int? selectedColor, bool? isDarkmode}) => AppTheme(
+        selectedColor: selectedColor ?? this.selectedColor,
+        isDarkmode: isDarkmode ?? this.isDarkmode,
+      );
 }

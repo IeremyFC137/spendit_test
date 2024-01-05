@@ -2,7 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:spendit_test/shared/widgets/app_bar_widget.dart';
+import 'package:spendit_test/features/shared/widgets/side_menu.dart';
+import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 
 List featuresImg = [
   SvgPicture.asset(
@@ -35,6 +36,7 @@ List<String> featuresDescription = [
 ];
 
 class HomeScreen extends StatefulWidget {
+  static const name = "home_screeen";
   const HomeScreen({super.key});
 
   @override
@@ -42,18 +44,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final controller = CarouselController();
   int activeIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-        backgroundColor: Colors.white,
+        key: scaffoldKey,
+        backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(0.85),
         appBar: const AppBarWidget(title: "Home"),
+        drawer: SideMenu(scaffoldKey: scaffoldKey),
         body: Column(children: [
-          Container(
-            color: colors.inversePrimary.withAlpha(100),
-            width: double.maxFinite,
+          SizedBox(
+            width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -123,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: Container(
-              color: colors.inversePrimary.withAlpha(250),
-              width: double.maxFinite,
+              color: colors.inversePrimary,
+              width: double.infinity,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,

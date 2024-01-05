@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spendit_test/config/router/app_router.dart';
 import 'package:spendit_test/config/theme/app_theme.dart';
-import 'package:spendit_test/presentation/screens/menu_screen.dart';
+import 'package:spendit_test/features/auth/presentation/providers/theme_provider.dart';
 
 void main() {
-  Get.lazyPut<MyDrawerController>(() => MyDrawerController());
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MainApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends ConsumerWidget {
+  const MainApp({super.key});
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppTheme appTheme = ref.watch(themeNotifierProvider);
+
+    return MaterialApp.router(
+        title: 'SPENDIT CESEL DEMO',
+        routerConfig: appRouter,
         debugShowCheckedModeBanner: false,
-        title: 'CESEL DEMO',
-        theme: AppTheme(selectedColor: 1).getTheme(),
-        home: const MyDrawer());
+        theme: appTheme.getTheme());
   }
 }
