@@ -15,7 +15,8 @@ class ThemeChangerScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
       appBar: AppBar(
-        title: const Text('Theme changer'),
+        title: const Align(
+            alignment: Alignment.center, child: Text('Cambiar tema')),
         actions: [
           IconButton(
               icon: Icon(isDarkmode

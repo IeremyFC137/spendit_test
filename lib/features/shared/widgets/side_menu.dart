@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendit_test/config/menu/menu_items.dart';
-import 'package:spendit_test/features/shared/widgets/custom_filled_button.dart';
+import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
+import 'package:spendit_test/features/shared/shared.dart';
 
-class SideMenu extends StatefulWidget {
+class SideMenu extends ConsumerStatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   const SideMenu({super.key, required this.scaffoldKey});
 
   @override
-  State<SideMenu> createState() => _SideMenuState();
+  SideMenuState createState() => SideMenuState();
 }
 
-class _SideMenuState extends State<SideMenu> {
+class SideMenuState extends ConsumerState<SideMenu> {
   int navDrawerIndex = 0;
 
   @override
@@ -33,7 +35,7 @@ class _SideMenuState extends State<SideMenu> {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(28, hasNotch ? 0 : 20, 16, 10),
-            child: const Text('Main'),
+            child: const Text('General'),
           ),
           ...appMenuItems.sublist(0, 2).map(
                 (item) => NavigationDrawerDestination(
@@ -70,9 +72,12 @@ class _SideMenuState extends State<SideMenu> {
                 ),
               ),
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child:
-                  CustomFilledButton(onPressed: () {}, text: "Cerrar sesión"))
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: CustomFilledButton(
+                  onPressed: () {
+                    ref.read(authProvider.notifier).logout();
+                  },
+                  text: "Cerrar sesión"))
         ]);
   }
 }

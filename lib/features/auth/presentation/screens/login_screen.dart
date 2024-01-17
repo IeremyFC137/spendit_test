@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
 import 'package:spendit_test/features/auth/presentation/providers/login_form_provider.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:spendit_test/features/shared/shared.dart';
@@ -60,18 +61,35 @@ class LoginScreen extends StatelessWidget {
 class _LoginForm extends ConsumerWidget {
   const _LoginForm();
 
+  void showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red));
+  }
+
   @override
   Widget build(BuildContext context, ref) {
     final loginForm = ref.watch(loginFormProvider);
 
-    final textStyles = Theme.of(context).textTheme;
+    ref.listen(authProvider, (previous, next) {
+      if (next.errorMessage.isEmpty) return;
+      showSnackbar(context, next.errorMessage);
+    });
+
+    //final textStyles = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
         children: [
           const SizedBox(height: 50),
-          Text('Login', style: textStyles.titleLarge),
+          const Text(
+            'Login',
+            style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Colors.white70),
+          ),
           const SizedBox(height: 50),
           CustomTextFormField(
             label: 'Correo',
@@ -85,6 +103,8 @@ class _LoginForm extends ConsumerWidget {
             label: 'Contraseña',
             obscureText: true,
             onChanged: ref.read(loginFormProvider.notifier).onPasswordChanged,
+            onFieldSubmitted: (_) =>
+                ref.read(loginFormProvider.notifier).onFormSubmit(),
             errorMessage:
                 loginForm.isFormPosted ? loginForm.password.errorMessage : null,
           ),
@@ -93,12 +113,11 @@ class _LoginForm extends ConsumerWidget {
             width: double.infinity,
             height: 60,
             child: CustomFilledButton(
-              text: 'Ingresar',
-              buttonColor: colors.primary,
-              onPressed: () {
-                ref.read(loginFormProvider.notifier).onFormSubmit();
-              },
-            ),
+                text: 'Ingresar',
+                buttonColor: colors.primary,
+                onPressed: loginForm.isPosting
+                    ? null
+                    : ref.read(loginFormProvider.notifier).onFormSubmit),
           ),
           const SizedBox(height: 30), // Reemplaza el primer Spacer
           /*Row(

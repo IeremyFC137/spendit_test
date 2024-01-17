@@ -10,15 +10,8 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
         title: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Align(
-          // const Align(
-          alignment: Alignment.centerLeft,
-          child: Text("$title - (Prueba)"
-              // ,style: TextStyle(
-              //   fontSize: 20,
-              // ),
-              ),
-        ),
+        const SizedBox(width: 0),
+        Text(title),
         Image.asset(
           "assets/img/spendit.png",
           // 'assets/SupervisorAppIcon.png',

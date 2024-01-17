@@ -7,17 +7,17 @@ import '../../domain/datasources/auth_datasource.dart';
 class AuthRepositoryImpl extends AuthRepository {
   final AuthDataSource dataSource;
 
-  AuthRepositoryImpl(AuthDataSource? dataSource)
-      : dataSource = dataSource ?? AuthDatasourceImp();
+  AuthRepositoryImpl({AuthDataSource? dataSource})
+      : dataSource = dataSource ?? AuthDataSourceImpl();
 
   @override
   Future<User> checkAuthStatus(String token) {
-    throw dataSource.checkAuthStatus(token);
+    return dataSource.checkAuthStatus(token);
   }
 
   @override
   Future<User> login(String email, String password) {
-    throw dataSource.login(email, password);
+    return dataSource.login(email, password);
   }
   /*
   @override<User> register(String email, String password, String fullName){

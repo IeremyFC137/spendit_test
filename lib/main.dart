@@ -16,6 +16,7 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppTheme appTheme = ref.watch(themeNotifierProvider);
+    final appRouter = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
         title: 'SPENDIT CESEL DEMO',

@@ -43,10 +43,21 @@ dependencies:
   flutter_riverpod: ^2.4.9
   formz: ^0.6.1
   flutter_dotenv: ^5.1.0
+  dio: ^5.4.0
+  shared_preferences: ^2.2.2
+  font_awesome_flutter: ^10.6.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/img/logo_spendit.png"
+  adaptive_icon_background: "#0e898d"
+  adaptive_icon_foreground: "assets/img/logo_foreground.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

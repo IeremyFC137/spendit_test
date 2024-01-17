@@ -1,9 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
 import 'package:spendit_test/features/shared/widgets/side_menu.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
+import '../../providers/providers.dart';
 
 List featuresImg = [
   SvgPicture.asset(
@@ -35,15 +39,15 @@ List<String> featuresDescription = [
   "Revisa las rendiciones\n enviadas"
 ];
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   static const name = "home_screeen";
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends ConsumerState<HomeScreen> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final controller = CarouselController();
   int activeIndex = 0;
@@ -51,10 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(0.85),
+        backgroundColor: colors.inversePrimary.withOpacity(0.72),
         appBar: const AppBarWidget(title: "Home"),
         drawer: SideMenu(scaffoldKey: scaffoldKey),
         body: Column(children: [
@@ -64,22 +67,67 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(
-                  height: 10,
+                  height: 15,
                 ),
-                Text("SpendIT - CESEL",
-                    style: TextStyle(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w500,
-                      fontSize: (MediaQuery.of(context).size.height >= 900
-                          ? 46
-                          : (MediaQuery.of(context).size.height >= 820
-                              ? 40
-                              : 35)),
-
-                      // fontSize: 35,
-                    )),
+                Row(children: [
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  const FaIcon(FontAwesomeIcons.dollarSign,
+                      color: Color.fromARGB(255, 228, 167, 13)),
+                  Text("SpendIT",
+                      style: TextStyle(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                          fontStyle: FontStyle.italic)),
+                  const FaIcon(FontAwesomeIcons.dollarSign,
+                      color: Color.fromARGB(255, 228, 167, 13)),
+                ]),
                 const SizedBox(
-                  height: 20,
+                  height: 30,
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          const Text(
+                            "Hola, ",
+                            style: TextStyle(color: Colors.white, fontSize: 25),
+                          ),
+                          Text(
+                            ref
+                                    .read(authProvider)
+                                    .user
+                                    ?.fullName
+                                    .split(" ")
+                                    .first
+                                    .toUpperCase() ??
+                                'Usuario no disponible',
+                            style: TextStyle(
+                                color: colors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                        ],
+                      ),
+                      const Row(children: [
+                        FaIcon(FontAwesomeIcons.handshakeAngle,
+                            color: Color.fromARGB(255, 228, 167, 13)),
+                        SizedBox(
+                          width: 20,
+                        ),
+                      ]),
+                    ]),
+                const SizedBox(
+                  height: 30,
                 ),
                 Container(
                   width: 200,
@@ -109,16 +157,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(
                   height: 15,
                 ),
-                Text(
+                const Text(
                   "Rinde gastos en un santiamén...",
                   style: TextStyle(
-                    color: colors.primary,
+                    color: Colors.white,
                     fontStyle: FontStyle.italic,
-                    fontSize: (MediaQuery.of(context).size.height >= 900
-                        ? 22
-                        : (MediaQuery.of(context).size.height >= 820
-                            ? 18
-                            : 16)),
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(
@@ -148,7 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   decoration: BoxDecoration(
                                     boxShadow: [
                                       BoxShadow(
-                                        color: colors.primary.withOpacity(0.2),
+                                        color: !ref
+                                                .read(themeNotifierProvider)
+                                                .isDarkmode
+                                            ? colors.primary.withOpacity(0.2)
+                                            : colors.primary.withOpacity(0.05),
                                         spreadRadius: 12,
                                         blurRadius: 10,
                                         offset: const Offset(0, 0),
@@ -164,9 +212,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 featuresDescription[index],
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: colors.primary,
+                                  color: !ref
+                                          .read(themeNotifierProvider)
+                                          .isDarkmode
+                                      ? Colors.black54
+                                      : Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: 20,
                                 ),
                               ),
                             ),
@@ -200,7 +252,9 @@ class _HomeScreenState extends State<HomeScreen> {
         onDotClicked: animateToSlide,
         effect: JumpingDotEffect(
             activeDotColor: Theme.of(context).colorScheme.primary,
-            dotColor: const Color.fromARGB(115, 221, 221, 221)),
+            dotColor: !ref.read(themeNotifierProvider).isDarkmode
+                ? Colors.white
+                : const Color.fromARGB(255, 108, 108, 108)),
       );
 
   void animateToSlide(int index) => controller.animateToPage(index);
