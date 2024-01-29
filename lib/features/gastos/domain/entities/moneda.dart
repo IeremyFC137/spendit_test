@@ -1,0 +1,1 @@
+enum Moneda { SOLES, DOLARES }

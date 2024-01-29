@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 
 class ScanitScreen extends StatelessWidget {
+  static const name = "scanit_screen";
   const ScanitScreen({super.key});
 
   @override
@@ -10,6 +11,6 @@ class ScanitScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
         appBar: const AppBarWidget(title: "Scanit"),
-        body: const Text("Simulación"));
+        body: Center(child: const Text("Simulación")));
   }
 }

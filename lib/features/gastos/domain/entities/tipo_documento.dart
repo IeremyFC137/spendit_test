@@ -1,0 +1,1 @@
+enum TipoDocumento { FACTURA, BOLETA }

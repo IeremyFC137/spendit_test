@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendit_test/config/router/app_router_notifier.dart';
@@ -15,42 +16,82 @@ final goRouterProvider = Provider((ref) {
       GoRoute(
         path: '/splash',
         name: CheckAuthStatusScreen.name,
-        builder: (context, state) => const CheckAuthStatusScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const CheckAuthStatusScreen(),
+        ),
       ),
       GoRoute(
         path: '/login',
         name: LoginScreen.name,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: '/',
         name: HomeScreen.name,
-        builder: (context, state) => const HomeScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const HomeScreen(),
+        ),
       ),
       GoRoute(
         path: '/gastos',
         name: GastosScreen.name,
-        builder: (context, state) => const GastosScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const GastosScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/gastos/ingreso-manual',
+        name: IngresoManualScreen.name,
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const IngresoManualScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/gastos/scanit',
+        name: ScanitScreen.name,
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const ScanitScreen(),
+        ),
       ),
       GoRoute(
         path: '/rendicion',
         name: RendicionScreen.name,
-        builder: (context, state) => const RendicionScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const RendicionScreen(),
+        ),
       ),
       GoRoute(
         path: '/revision',
         name: RevisionScreen.name,
-        builder: (context, state) => const RevisionScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const RevisionScreen(),
+        ),
       ),
       GoRoute(
         path: '/fondos',
         name: FondosScreen.name,
-        builder: (context, state) => const FondosScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const FondosScreen(),
+        ),
       ),
       GoRoute(
         path: '/theme-changer',
         name: ThemeChangerScreen.name,
-        builder: (context, state) => const ThemeChangerScreen(),
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const ThemeChangerScreen(),
+        ),
       ),
     ],
     redirect: (context, state) {
@@ -78,4 +119,18 @@ final goRouterProvider = Provider((ref) {
   );
 });
 
-// GoRouter configuration
+CustomTransitionPage<void> _fadeTransitionPage({
+  required LocalKey key,
+  required Widget child,
+  Duration duration =
+      const Duration(milliseconds: 300), // Duración personalizada
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: duration, // Estableciendo la duración de la transición
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+}

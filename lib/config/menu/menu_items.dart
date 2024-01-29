@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MenuItem {
   final String title;
@@ -28,20 +29,20 @@ const appMenuItems = <MenuItem>[
       title: 'Gastos',
       subTitle: 'Registro de gastos',
       link: '/gastos',
-      icon: Icons.account_balance),
+      icon: FontAwesomeIcons.filePen),
   MenuItem(
       title: 'Rendición',
       subTitle: 'Registro de rendición',
       link: '/rendicion',
-      icon: Icons.money),
+      icon: FontAwesomeIcons.fileInvoiceDollar),
   MenuItem(
       title: 'Fondos',
       subTitle: 'Registro de fondos',
       link: '/fondos',
-      icon: Icons.monetization_on),
+      icon: FontAwesomeIcons.handHoldingDollar),
   MenuItem(
       title: 'Revisión',
       subTitle: 'Registro de revision',
       link: '/revision',
-      icon: Icons.manage_accounts),
+      icon: FontAwesomeIcons.magnifyingGlassDollar),
 ];
