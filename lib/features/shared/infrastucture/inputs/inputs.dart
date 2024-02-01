@@ -1,2 +1,15 @@
 export 'email.dart';
 export 'password.dart';
+export 'numero_de_documento.dart';
+export 'ruc.dart';
+export 'proveedor.dart';
+export 'fecha_de_emisión.dart';
+export 'c_contable.dart';
+export 'c_costo.dart';
+export 'c_gasto.dart';
+export 'igv.dart';
+export 'sub_total.dart';
+export 'tipo_de_documento.dart';
+export 'moneda.dart';
+export 'importe.dart';
+export 'p_importe.dart';

@@ -54,6 +54,14 @@ final goRouterProvider = Provider((ref) {
         ),
       ),
       GoRoute(
+        path: '/gastos/:id',
+        name: GastoScreen.name,
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: GastoScreen(gastoId: state.pathParameters['id'] ?? "0"),
+        ),
+      ),
+      GoRoute(
         path: '/gastos/scanit',
         name: ScanitScreen.name,
         pageBuilder: (context, state) => _fadeTransitionPage(

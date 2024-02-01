@@ -1,8 +1,8 @@
 import 'package:spendit_test/features/gastos/domain/entities/entities.dart';
-import 'utils_mapper.dart';
+import 'mapper_utils.dart';
 
 class GastoMapper {
-  static jsonToEntity(Map<String, dynamic> json) => Gasto(
+  static gastoJsonToEntity(Map<String, dynamic> json) => Gasto(
       id: json["id"],
       idUsuario: json["idUsuario"],
       proveedor: json["proveedor"],

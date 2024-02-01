@@ -19,6 +19,8 @@ abstract class GastosDatasource {
 
   Future<void> eliminarGasto(int gastoId);
 
+  Future<Gasto> getGastoById(int gastoId);
+
   Future<Gasto> editarGasto(
       {required int gastoId,
       String? cCosto,
@@ -27,7 +29,7 @@ abstract class GastosDatasource {
       double? importe,
       double? pImporte});
 
-  Future<List<Gasto>> listarGastos({int size = 6, int page = 0});
+  Future<List<Gasto>> listarGastos({int size = 7, int page = 0});
 
   Future<void> validarGastoConSunat();
 }

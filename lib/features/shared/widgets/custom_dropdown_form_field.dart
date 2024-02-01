@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
 
-class CustomTextFormField extends StatelessWidget {
+class CustomDropdownFormField<T> extends StatelessWidget {
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
   final String? label;
   final String? hint;
   final String? errorMessage;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final Function(String)? onChanged;
-  final Function(String)? onFieldSubmitted;
-  final String? Function(String?)? validator;
-  final TextEditingController? controller;
+  final Function(T?)? onChanged;
 
-  const CustomTextFormField({
+  const CustomDropdownFormField({
     super.key,
+    this.value,
+    required this.items,
     this.label,
     this.hint,
     this.errorMessage,
-    this.obscureText = false,
-    this.keyboardType = TextInputType.text,
     this.onChanged,
-    this.onFieldSubmitted,
-    this.validator,
-    this.controller,
   });
 
   @override
@@ -35,7 +29,6 @@ class CustomTextFormField extends StatelessWidget {
     const borderRadius = Radius.circular(15);
 
     return Container(
-      // padding: const EdgeInsets.only(bottom: 0, top: 15),
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: const BorderRadius.only(
@@ -48,13 +41,10 @@ class CustomTextFormField extends StatelessWidget {
                 blurRadius: 10,
                 offset: const Offset(0, 5))
           ]),
-      child: TextFormField(
-        controller: controller,
+      child: DropdownButtonFormField<T>(
+        value: value,
         onChanged: onChanged,
-        validator: validator,
-        onFieldSubmitted: onFieldSubmitted,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
+        items: items,
         style: const TextStyle(fontSize: 20, color: Colors.black54),
         decoration: InputDecoration(
           floatingLabelStyle: const TextStyle(
@@ -65,14 +55,12 @@ class CustomTextFormField extends StatelessWidget {
               borderSide: const BorderSide(color: Colors.transparent)),
           focusedErrorBorder: border.copyWith(
               borderSide: const BorderSide(color: Colors.transparent)),
-          isDense: true,
           label: label != null
               ? Text(label!, style: const TextStyle(color: Colors.black54))
               : null,
           hintText: hint,
           errorText: errorMessage,
           focusColor: colors.primary,
-          // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
         ),
       ),
     );

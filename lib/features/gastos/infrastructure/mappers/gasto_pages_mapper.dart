@@ -4,7 +4,7 @@ import '../../domain/entities/entities.dart';
 class GastoPagesMapper {
   static jsonToEntity(Map<String, dynamic> json) => GastoPages(
         content: List<Gasto>.from(
-            json["content"].map((x) => GastoMapper.jsonToEntity(x))),
+            json["content"].map((x) => GastoMapper.gastoJsonToEntity(x))),
         pageable: Pageable.fromJson(json["pageable"]),
         last: json["last"],
         totalPages: json["totalPages"],

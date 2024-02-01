@@ -50,27 +50,25 @@ class _GastosScreenState extends ConsumerState {
       appBar: AppBarWidget(
           title: "Gastos",
           icon: IconButton(onPressed: () => {}, icon: Icon(Icons.search))),
-      body: ListView.builder(
-          controller: scrollController,
-          itemCount: gastosState.gastos.length,
-          physics: BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            if (index >= gastosState.gastos.length) {
-              // Si es el último ítem, muestra el indicador de carga
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Card(
-                color: Colors.transparent,
-                elevation: 0,
-                child: GastoCard(gasto: gastosState.gastos[index]),
-              ),
-            );
-          }),
+      body: gastosState.isLoading && gastosState.gastos.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              controller: scrollController,
+              itemCount: gastosState.gastos.length,
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (context, index) {
+                final gasto = gastosState.gastos[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Card(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    child: GestureDetector(
+                        onTap: () => context.push('/gastos/${gasto.id}'),
+                        child: GastoCard(gasto: gasto)),
+                  ),
+                );
+              }),
       floatingActionButton: SpeedDial(
         icon: isDialOpen ? Icons.close : Icons.add,
         activeIcon: Icons.close,

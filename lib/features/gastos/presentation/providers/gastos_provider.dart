@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'gastos_repository_provider.dart';
 
@@ -6,7 +7,9 @@ final gastosProvider =
     StateNotifierProvider<GastosNotifier, GastosState>((ref) {
   final gastosRepository = ref.watch(gastosRepositoryProvider);
 
-  return GastosNotifier(gastosRepository: gastosRepository);
+  return GastosNotifier(
+    gastosRepository: gastosRepository,
+  );
 });
 
 class GastosNotifier extends StateNotifier<GastosState> {
@@ -33,8 +36,48 @@ class GastosNotifier extends StateNotifier<GastosState> {
     state = state.copyWith(
         isLastPage: false,
         isLoading: false,
-        page: state.page + 1,
+        page: gastos.isEmpty ? state.page : state.page + 1,
         gastos: [...state.gastos, ...gastos]);
+  }
+
+  Future<void> registrarGasto(
+      int idUsuario,
+      String proveedor,
+      String ruc,
+      TipoDocumento tipoDocumento,
+      String documento,
+      DateTime fecha_emision,
+      double subTotal,
+      double igv,
+      double importe,
+      double pImporte,
+      Moneda moneda,
+      String cCosto,
+      String cGasto,
+      String cContable) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      final gasto = await gastosRepository.registrarGasto(
+          idUsuario: idUsuario,
+          proveedor: proveedor,
+          ruc: ruc,
+          tipoDocumento: tipoDocumento,
+          documento: documento,
+          fecha_emision: fecha_emision,
+          subTotal: subTotal,
+          igv: igv,
+          importe: importe,
+          pImporte: pImporte,
+          moneda: moneda,
+          cCosto: cCosto,
+          cGasto: cGasto,
+          cContable: cContable);
+      state =
+          state.copyWith(gastos: [...state.gastos, gasto], isLoading: false);
+    } catch (e) {
+      state.copyWith(isLoading: false);
+      print(e);
+    }
   }
 }
 
@@ -47,7 +90,7 @@ class GastosState {
 
   GastosState(
       {this.isLastPage = false,
-      this.size = 6,
+      this.size = 7,
       this.page = 0,
       this.isLoading = false,
       this.gastos = const []});

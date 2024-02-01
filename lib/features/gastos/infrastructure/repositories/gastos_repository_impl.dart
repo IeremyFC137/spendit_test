@@ -29,7 +29,12 @@ class GastosRepositoryImpl extends GastosRepository {
   }
 
   @override
-  Future<List<Gasto>> listarGastos({int size = 6, int page = 0}) {
+  Future<Gasto> getGastoById(int gastoId) {
+    return datasource.getGastoById(gastoId);
+  }
+
+  @override
+  Future<List<Gasto>> listarGastos({int size = 7, int page = 0}) {
     return datasource.listarGastos(page: page, size: size);
   }
 

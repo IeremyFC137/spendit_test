@@ -1,0 +1,1 @@
+class GastoNotFound implements Exception {}

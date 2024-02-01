@@ -24,15 +24,24 @@ Moneda parseMoneda(String moneda) {
 }
 
 DateTime parseFechaEmision(String fechaStr) {
-  DateFormat formato1 = DateFormat("dd/MM/yyyy");
-  DateFormat formato2 = DateFormat("dd-MM-yyyy");
+  DateFormat formatoConGuiones = DateFormat("yyyy-MM-dd");
+  DateFormat formatoConBarras = DateFormat("yyyy/MM/dd");
+
   try {
-    return formato1.parse(fechaStr);
+    // Primero intenta con el formato con guiones
+    return formatoConGuiones.parseStrict(fechaStr);
   } catch (e) {
     try {
-      return formato2.parse(fechaStr);
+      // Si falla, intenta con el formato con barras
+      return formatoConBarras.parseStrict(fechaStr);
     } catch (e) {
+      // Si ambos fallan, lanza una excepción
       throw FormatException("Formato de fecha no válido: $fechaStr");
     }
   }
+}
+
+String formatDateTime(DateTime dateTime) {
+  final DateFormat formatter = DateFormat('yyyy-MM-ddTHH:mm:ss');
+  return formatter.format(dateTime);
 }

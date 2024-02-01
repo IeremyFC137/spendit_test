@@ -1,5 +1,5 @@
 import 'package:spendit_test/features/gastos/domain/entities/entities.dart';
-import 'utils_mapper.dart';
+import 'mapper_utils.dart';
 
 class GastoScanitMapper {
   static jsonToEntity(Map<String, dynamic> json) => GastoScanit(

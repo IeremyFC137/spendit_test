@@ -1,5 +1,4 @@
-import 'moneda.dart';
-import 'tipo_documento.dart';
+import 'package:spendit_test/features/gastos/domain/domain.dart';
 
 class Gasto {
   final int id;
