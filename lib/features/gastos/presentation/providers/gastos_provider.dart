@@ -40,6 +40,47 @@ class GastosNotifier extends StateNotifier<GastosState> {
         gastos: [...state.gastos, ...gastos]);
   }
 
+  Future<bool> editarGasto(int gastoId, String? cCosto, String? cGasto,
+      String? cContable, double importe, double pImporte) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      var aux =
+          state.gastos.where((element) => element.id == gastoId).toList()[0];
+      if (aux.cCosto == cCosto) {
+        cCosto = null;
+      }
+      if (aux.cGasto == cGasto) {
+        cGasto = null;
+      }
+      if (aux.cContable == cContable) {
+        cContable = null;
+      }
+      if (aux.importe == importe) {
+        importe = 0.0;
+      }
+      if (aux.pImporte == pImporte) {
+        pImporte = 2.0;
+      }
+      final gasto = await gastosRepository.editarGasto(
+          gastoId: gastoId,
+          cContable: cContable,
+          cCosto: cCosto,
+          cGasto: cGasto,
+          importe: importe,
+          pImporte: pImporte);
+      state = state.copyWith(
+          gastos: state.gastos
+              .map(
+                (element) => (element.id == gasto.id) ? gasto : element,
+              )
+              .toList(),
+          isLoading: false);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> registrarGasto(
       int idUsuario,
       String proveedor,

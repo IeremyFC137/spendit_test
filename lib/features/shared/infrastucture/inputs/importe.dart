@@ -8,9 +8,12 @@ class Importe extends FormzInput<double, ImporteInputdError> {
   const Importe.dirty([double value = 0.0]) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case ImporteInputdError.empty:
         return 'El campo "Importe" no puede ser nulo';
+      case ImporteInputdError.invalid:
+        return 'El campo "Importe" no puede ser negativo';
       default:
         return null;
     }
@@ -20,6 +23,9 @@ class Importe extends FormzInput<double, ImporteInputdError> {
   ImporteInputdError? validator(double value) {
     if (value == 0.0) {
       return ImporteInputdError.empty;
+    }
+    if (value < 0) {
+      return ImporteInputdError.invalid;
     }
     // Aquí se puede añadir más lógica de validación si es necesario
     return null;

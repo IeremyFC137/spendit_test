@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
 import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
@@ -7,20 +8,51 @@ import 'package:spendit_test/features/gastos/presentation/providers/gastos_provi
 import '../../../auth/domain/domain.dart';
 import '../../../shared/infrastucture/inputs/inputs.dart';
 
-final gastoFormProvider =
-    StateNotifierProvider.autoDispose<GastoFormNotifier, GastoFormState>((ref) {
+final gastoFormProvider = StateNotifierProvider.autoDispose
+    .family<GastoFormNotifier, GastoFormState, Gasto?>((ref, gasto) {
   final gastoRegistrarCallback =
       ref.watch(gastosProvider.notifier).registrarGasto;
+  final gastoActualizarCallback =
+      ref.watch(gastosProvider.notifier).editarGasto;
   final user = ref.watch(authProvider).user;
   return GastoFormNotifier(
-      gastoRegistrarCallback: gastoRegistrarCallback, user: user);
+      gastoRegistrarCallback: gastoRegistrarCallback,
+      gastoActualizarCallback: gastoActualizarCallback,
+      user: user,
+      gasto: gasto);
 });
 
 class GastoFormNotifier extends StateNotifier<GastoFormState> {
   final Function gastoRegistrarCallback;
+  final Function gastoActualizarCallback;
   final User? user;
-  GastoFormNotifier({required this.gastoRegistrarCallback, required this.user})
-      : super(GastoFormState());
+  GastoFormNotifier(
+      {required this.gastoRegistrarCallback,
+      required this.user,
+      Gasto? gasto,
+      required this.gastoActualizarCallback})
+      : super(GastoFormState(
+            id: gasto?.id,
+            isValid: gasto == null ? false : true,
+            proveedor: Proveedor.dirty(gasto?.proveedor ?? ""),
+            ruc: Ruc.dirty(gasto?.ruc ?? ""),
+            tipoDocumento: DocumentType.dirty(
+                gasto?.tipoDocumento ?? TipoDocumento.BOLETA),
+            numeroDocumento: DocumentNumber.dirty(gasto?.documento ?? ''),
+            fechaEmision: FechaEmision.dirty(DateFormat('yyyy-MM-dd').format(
+                        gasto?.fechaEmision ?? DateTime(2024, 01, 01))) ==
+                    FechaEmision.dirty("2024-01-01")
+                ? FechaEmision.dirty('')
+                : FechaEmision.dirty(
+                    DateFormat('yyyy-MM-dd').format(gasto!.fechaEmision)),
+            subTotal: SubTotal.dirty(gasto?.subTotal ?? 0.0),
+            igv: Igv.dirty(gasto?.igv ?? 0.0),
+            moneda: MoneyType.dirty(gasto?.moneda ?? Moneda.SOLES),
+            centroCosto: CentroCosto.dirty(gasto?.cCosto ?? ''),
+            conceptoGasto: ConceptoGasto.dirty(gasto?.cGasto ?? ''),
+            cuentaContable: CuentaContable.dirty(gasto?.cContable ?? ''),
+            importe: Importe.dirty(gasto?.importe ?? 0.0),
+            pimporte: Pimporte.dirty(gasto?.pImporte ?? 0.0)));
 
   onProveedorChange(String value) {
     final newProveedor = Proveedor.dirty(value);
@@ -255,6 +287,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
 
   onImporteChange(double value) {
     final newImporte = Importe.dirty(value);
+
     state = state.copyWith(
         importe: newImporte,
         isValid: Formz.validate([
@@ -293,6 +326,29 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.importe,
           newPimporte
         ]));
+  }
+
+  Future<bool> onFormActualizarSubmit() async {
+    _touchEveryField();
+    if (!state.isValid) return false;
+    state = state.copyWith(isPosting: true);
+
+    try {
+      var isSuccess = await gastoActualizarCallback(
+          state.id,
+          state.centroCosto.value,
+          state.conceptoGasto.value,
+          state.cuentaContable.value,
+          state.importe.value,
+          state.pimporte.value);
+      state = state.copyWith(isPosting: false);
+      return isSuccess;
+    } catch (e) {
+      print(e);
+      Exception(e);
+      state = state.copyWith(isPosting: false);
+      return false;
+    }
   }
 
   Future<bool> onFormSubmit() async {
@@ -343,19 +399,6 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
     final pimporte = Pimporte.dirty(state.pimporte.value);
     state = state.copyWith(
         isFormPosted: true,
-        proveedor: proveedor,
-        ruc: ruc,
-        tipoDocumento: tipoDocumento,
-        numeroDocumento: numeroDocumento,
-        fechaEmision: fechaEmision,
-        subTotal: subTotal,
-        igv: igv,
-        moneda: moneda,
-        centroCosto: centroCosto,
-        conceptoGasto: conceptoGasto,
-        cuentaContable: cuentaContable,
-        importe: importe,
-        pimporte: pimporte,
         isValid: Formz.validate([
           proveedor,
           ruc,
@@ -378,6 +421,7 @@ class GastoFormState {
   final bool isPosting;
   final bool isFormPosted;
   final bool isValid;
+  final int? id;
   final Proveedor proveedor;
   final Ruc ruc;
   final DocumentType tipoDocumento;
@@ -393,6 +437,10 @@ class GastoFormState {
   final Pimporte pimporte;
 
   GastoFormState({
+    this.isPosting = false,
+    this.isFormPosted = false,
+    this.isValid = false,
+    this.id,
     this.proveedor = const Proveedor.pure(),
     this.ruc = const Ruc.pure(),
     this.tipoDocumento = const DocumentType.pure(),
@@ -406,15 +454,13 @@ class GastoFormState {
     this.cuentaContable = const CuentaContable.pure(),
     this.importe = const Importe.pure(),
     this.pimporte = const Pimporte.pure(),
-    this.isPosting = false,
-    this.isFormPosted = false,
-    this.isValid = false,
   });
 
   GastoFormState copyWith(
           {bool? isPosting,
           bool? isFormPosted,
           bool? isValid,
+          int? id,
           Proveedor? proveedor,
           Ruc? ruc,
           DocumentType? tipoDocumento,
@@ -432,6 +478,7 @@ class GastoFormState {
         isPosting: isPosting ?? this.isPosting,
         isFormPosted: isFormPosted ?? this.isFormPosted,
         isValid: isValid ?? this.isValid,
+        id: id ?? this.id,
         proveedor: proveedor ?? this.proveedor,
         ruc: ruc ?? this.ruc,
         tipoDocumento: tipoDocumento ?? this.tipoDocumento,

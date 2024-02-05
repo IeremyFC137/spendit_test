@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/gasto_form_provider.dart';
+import 'package:spendit_test/features/gastos/presentation/widgets/widgets.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 
 import '../../../shared/shared.dart';
@@ -45,7 +47,8 @@ class _GastoForm extends ConsumerWidget {
   const _GastoForm();
   @override
   Widget build(BuildContext context, ref) {
-    final gastoForm = ref.watch(gastoFormProvider);
+    final gastoForm = ref.watch(gastoFormProvider(null));
+    print(gastoForm);
     final colors = Theme.of(context).colorScheme;
     return Padding(
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
@@ -53,133 +56,86 @@ class _GastoForm extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Datos Generales",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                )),
+            Row(
+              children: [
+                Text("Datos Generales",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    )),
+                SizedBox(
+                  width: 8,
+                ),
+                FaIcon(
+                  FontAwesomeIcons.globe,
+                )
+              ],
+            ),
             SizedBox(
               height: 20,
             ),
-            Text(
-              "Proveedor",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            CustomGastoField(
+              maxLines: 2,
               label: 'Proveedor',
+              isTopField: true,
               keyboardType: TextInputType.text,
-              onChanged: ref.read(gastoFormProvider.notifier).onProveedorChange,
+              onChanged:
+                  ref.read(gastoFormProvider(null).notifier).onProveedorChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.proveedor.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Ruc",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Ruc',
               keyboardType: TextInputType.text,
-              onChanged: ref.read(gastoFormProvider.notifier).onRucChange,
+              isTopField: false,
+              onChanged: ref.read(gastoFormProvider(null).notifier).onRucChange,
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.ruc.errorMessage : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Tipo de Documento",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
+            DividerForm(),
             CustomDropdownFormField<TipoDocumento>(
+              maxLines: 2,
               value:
                   gastoForm.tipoDocumento.value, // Valor actual del formulario
               items: getTipoDocumentoItems(),
-              label: 'Tipo de Documento',
-              onChanged: (value) =>
-                  ref.read(gastoFormProvider.notifier).onTipoDocumentoChange,
+              isTopField: false,
+              label: 'Tipo de documento',
+              onChanged: (value) => ref
+                  .read(gastoFormProvider(null).notifier)
+                  .onTipoDocumentoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.tipoDocumento.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Moneda",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
+            DividerForm(),
             CustomDropdownFormField<Moneda>(
+              maxLines: 2,
               value: gastoForm.moneda.value, // Valor actual del formulario
+              isTopField: false,
               items: getMonedaItems(),
               label: 'Tipo de moneda',
               onChanged: (value) =>
-                  ref.read(gastoFormProvider.notifier).onMonedaChange,
+                  ref.read(gastoFormProvider(null).notifier).onMonedaChange,
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.moneda.errorMessage : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "N° Documento",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Numero de documento',
+              isTopField: false,
               keyboardType: TextInputType.text,
-              onChanged:
-                  ref.read(gastoFormProvider.notifier).onNumeroDocumentoChange,
+              onChanged: ref
+                  .read(gastoFormProvider(null).notifier)
+                  .onNumeroDocumentoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.numeroDocumento.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Fecha de emisión",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
+            DividerForm(),
             InkWell(
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
@@ -193,13 +149,15 @@ class _GastoForm extends ConsumerWidget {
                   String formattedDate =
                       DateFormat('yyyy-MM-dd').format(pickedDate);
                   ref
-                      .read(gastoFormProvider.notifier)
+                      .read(gastoFormProvider(null).notifier)
                       .onFechaEmisionChange(formattedDate);
                 }
               },
               child: IgnorePointer(
-                child: CustomTextFormField(
+                child: CustomGastoField(
+                  maxLines: 2,
                   label: 'Fecha de emisión',
+                  //isTopField: false,
                   keyboardType: TextInputType.datetime,
                   onChanged: (_) {}, // La lógica del cambio se maneja en onTap
                   errorMessage: gastoForm.isFormPosted
@@ -210,47 +168,27 @@ class _GastoForm extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Sub Total",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Sub Total',
+              isTopField: false,
               keyboardType: TextInputType.number,
               onChanged: (value) => ref
-                  .read(gastoFormProvider.notifier)
+                  .read(gastoFormProvider(null).notifier)
                   .onSubTotalChange(double.parse(value)),
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.subTotal.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Igv",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'IGV',
+              isBottomField: true,
               keyboardType: TextInputType.number,
               onChanged: (value) => ref
-                  .read(gastoFormProvider.notifier)
+                  .read(gastoFormProvider(null).notifier)
                   .onIgvChange(double.parse(value)),
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.igv.errorMessage : null,
@@ -258,115 +196,84 @@ class _GastoForm extends ConsumerWidget {
             SizedBox(
               height: 20,
             ),
-            Text("Detalles",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                )),
-            SizedBox(
-              height: 10,
+            Row(
+              children: [
+                Text("Detalles",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    )),
+                SizedBox(
+                  width: 8,
+                ),
+                FaIcon(
+                  FontAwesomeIcons.circleInfo,
+                )
+              ],
             ),
             SizedBox(
-              height: 10,
+              height: 20,
             ),
-            Text(
-              "Centro de costo",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            CustomGastoField(
+              maxLines: 2,
               label: 'Centro de costo',
+              isTopField: true,
               keyboardType: TextInputType.text,
-              onChanged:
-                  ref.read(gastoFormProvider.notifier).onCentroCostoChange,
+              onChanged: ref
+                  .read(gastoFormProvider(null).notifier)
+                  .onCentroCostoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.centroCosto.errorMessage
                   : null,
             ),
-            Text(
-              "Concepto de gasto",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Concepto de gasto',
+              isTopField: false,
               keyboardType: TextInputType.text,
-              onChanged:
-                  ref.read(gastoFormProvider.notifier).onConceptoGastoChange,
+              onChanged: ref
+                  .read(gastoFormProvider(null).notifier)
+                  .onConceptoGastoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.conceptoGasto.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Cuenta contable",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Cuenta contable',
+              isTopField: false,
               keyboardType: TextInputType.text,
-              onChanged:
-                  ref.read(gastoFormProvider.notifier).onCuentaContableChange,
+              onChanged: ref
+                  .read(gastoFormProvider(null).notifier)
+                  .onCuentaContableChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.cuentaContable.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Importe",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomTextFormField(
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
               label: 'Importe',
+              isTopField: false,
               keyboardType: TextInputType.number,
               onChanged: (values) => ref
-                  .read(gastoFormProvider.notifier)
+                  .read(gastoFormProvider(null).notifier)
                   .onImporteChange(double.parse(values)),
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.importe.errorMessage
                   : null,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            CustomTextFormField(
-              label: 'Porcentaje de Importe',
+            DividerForm(),
+            CustomGastoField(
+              maxLines: 2,
+              label:
+                  "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
               keyboardType: TextInputType.number,
+              isBottomField: true,
               onChanged: (values) => ref
-                  .read(gastoFormProvider.notifier)
+                  .read(gastoFormProvider(null).notifier)
                   .onPimporteChange(double.parse(values)),
               validator: (value) {
                 if (value == null || value.isEmpty)
@@ -382,7 +289,7 @@ class _GastoForm extends ConsumerWidget {
                   : null,
             ),
             SizedBox(
-              height: 20,
+              height: 50,
             ),
             Center(
               child: SizedBox(
@@ -395,7 +302,7 @@ class _GastoForm extends ConsumerWidget {
                       ? null
                       : () async {
                           final isSuccess = await ref
-                              .read(gastoFormProvider.notifier)
+                              .read(gastoFormProvider(null).notifier)
                               .onFormSubmit();
                           if (isSuccess) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -407,7 +314,7 @@ class _GastoForm extends ConsumerWidget {
                               ),
                             );
                             context.pop(); // Regresa a la pantalla anterior.
-                          } else {
+                          } else if (gastoForm.isValid) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text("Error al registrar el gasto"),
@@ -422,7 +329,7 @@ class _GastoForm extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 20,
+              height: 30,
             ),
           ],
         ));

@@ -12,6 +12,7 @@ class Proveedor extends FormzInput<String, ProveedorError> {
   const Proveedor.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case ProveedorError.empty:
         return 'El campo "proveedor" no puede estar vacio';

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
 import 'package:spendit_test/features/shared/widgets/side_menu.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 import '../../providers/providers.dart';

@@ -12,6 +12,7 @@ class ConceptoGasto extends FormzInput<String, ConceptoGastoError> {
   const ConceptoGasto.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case ConceptoGastoError.empty:
         return 'El campo "Concepto de gasto" no puede estar vacio';

@@ -12,6 +12,7 @@ class CuentaContable extends FormzInput<String, CuentaContableError> {
   const CuentaContable.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case CuentaContableError.empty:
         return 'El campo "Cuenta contable" no puede estar vacio';

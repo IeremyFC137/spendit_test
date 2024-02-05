@@ -8,6 +8,7 @@ class Pimporte extends FormzInput<double, PimporteInputError> {
   const Pimporte.dirty(double value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     if (error == PimporteInputError.empty)
       return 'El campo "Porcentaje de importe" no puede ser nulo';
     if (error == PimporteInputError.invalid)

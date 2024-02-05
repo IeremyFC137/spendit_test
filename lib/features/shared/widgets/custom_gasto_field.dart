@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CustomGastoField extends StatelessWidget {
+import '../../auth/presentation/providers/providers.dart';
+
+class CustomGastoField extends ConsumerWidget {
   final bool isTopField; // La idea es que tenga bordes redondeados arriba
   final bool isBottomField; // La idea es que tenga bordes redondeados abajo
   final String? label;
@@ -9,7 +12,7 @@ class CustomGastoField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final int maxLines;
-  final String initialValue;
+  final String? initialValue;
   final Function(String)? onChanged;
   final Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
@@ -25,14 +28,14 @@ class CustomGastoField extends StatelessWidget {
       this.obscureText = false,
       this.keyboardType = TextInputType.text,
       this.maxLines = 1,
-      this.initialValue = '',
+      this.initialValue,
       this.onChanged,
       this.onFieldSubmitted,
       this.validator,
       this.controller});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final colors = Theme.of(context).colorScheme;
 
     final border = OutlineInputBorder(
@@ -44,7 +47,9 @@ class CustomGastoField extends StatelessWidget {
     return Container(
       // padding: const EdgeInsets.only(bottom: 0, top: 15),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: !ref.read(themeNotifierProvider).isDarkmode
+              ? Colors.white
+              : colors.primary,
           borderRadius: BorderRadius.only(
             topLeft: isTopField ? borderRadius : Radius.zero,
             topRight: isTopField ? borderRadius : Radius.zero,
@@ -65,15 +70,20 @@ class CustomGastoField extends StatelessWidget {
         validator: validator,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 15, color: Colors.black54),
+        style: TextStyle(fontSize: 20, color: Colors.black54),
         maxLines: maxLines,
         initialValue: initialValue,
         decoration: InputDecoration(
-          floatingLabelBehavior: maxLines > 1
+          floatingLabelBehavior: maxLines > 2
               ? FloatingLabelBehavior.always
               : FloatingLabelBehavior.auto,
           floatingLabelStyle: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15),
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          labelStyle: TextStyle(
+            color: !ref.read(themeNotifierProvider).isDarkmode
+                ? Colors.black
+                : colors.onPrimary,
+          ),
           enabledBorder: border,
           focusedBorder: border,
           errorBorder: border.copyWith(
@@ -84,6 +94,7 @@ class CustomGastoField extends StatelessWidget {
           label: label != null ? Text(label!) : null,
           hintText: hint,
           errorText: errorMessage,
+          errorStyle: TextStyle(color: Colors.red),
           focusColor: colors.primary,
           // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
         ),

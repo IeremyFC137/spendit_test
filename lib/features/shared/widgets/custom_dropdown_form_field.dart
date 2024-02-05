@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CustomDropdownFormField<T> extends StatelessWidget {
+import '../../auth/presentation/providers/providers.dart';
+
+class CustomDropdownFormField<T> extends ConsumerWidget {
+  final bool isTopField; // La idea es que tenga bordes redondeados arriba
+  final bool isBottomField; // La idea es que tenga bordes redondeados abajo
   final T? value;
   final List<DropdownMenuItem<T>> items;
   final String? label;
   final String? hint;
+  final int maxLines;
   final String? errorMessage;
   final Function(T?)? onChanged;
 
-  const CustomDropdownFormField({
-    super.key,
-    this.value,
-    required this.items,
-    this.label,
-    this.hint,
-    this.errorMessage,
-    this.onChanged,
-  });
+  const CustomDropdownFormField(
+      {super.key,
+      this.maxLines = 1,
+      this.value,
+      required this.items,
+      this.label,
+      this.hint,
+      this.errorMessage,
+      this.onChanged,
+      this.isTopField = false,
+      this.isBottomField = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final colors = Theme.of(context).colorScheme;
 
     final border = OutlineInputBorder(
@@ -30,37 +38,48 @@ class CustomDropdownFormField<T> extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.only(
-              topLeft: borderRadius,
-              bottomLeft: borderRadius,
-              bottomRight: borderRadius),
+          color: !ref.read(themeNotifierProvider).isDarkmode
+              ? Colors.white
+              : colors.primary,
+          borderRadius: BorderRadius.only(
+            topLeft: isTopField ? borderRadius : Radius.zero,
+            topRight: isTopField ? borderRadius : Radius.zero,
+            bottomLeft: isBottomField ? borderRadius : Radius.zero,
+            bottomRight: isBottomField ? borderRadius : Radius.zero,
+          ),
           boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 5))
+            if (isBottomField)
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 5,
+                  offset: const Offset(0, 3))
           ]),
       child: DropdownButtonFormField<T>(
         value: value,
         onChanged: onChanged,
         items: items,
         style: const TextStyle(fontSize: 20, color: Colors.black54),
+        dropdownColor: !ref.read(themeNotifierProvider).isDarkmode
+            ? Colors.white
+            : colors.onPrimary,
         decoration: InputDecoration(
+          floatingLabelBehavior: maxLines > 2
+              ? FloatingLabelBehavior.always
+              : FloatingLabelBehavior.auto,
           floatingLabelStyle: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
           enabledBorder: border,
           focusedBorder: border,
           errorBorder: border.copyWith(
               borderSide: const BorderSide(color: Colors.transparent)),
           focusedErrorBorder: border.copyWith(
               borderSide: const BorderSide(color: Colors.transparent)),
-          label: label != null
-              ? Text(label!, style: const TextStyle(color: Colors.black54))
-              : null,
+          isDense: true,
+          label: label != null ? Text(label!) : null,
           hintText: hint,
           errorText: errorMessage,
           focusColor: colors.primary,
+          // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
         ),
       ),
     );

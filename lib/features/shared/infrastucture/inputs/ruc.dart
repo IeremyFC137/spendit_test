@@ -15,6 +15,7 @@ class Ruc extends FormzInput<String, RucError> {
   const Ruc.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     if (error == RucError.empty) return 'El RUC no puede estar vacío';
     if (error == RucError.invalidLength) return 'El RUC debe tener 11 dígitos';
     if (error == RucError.invalidFormat) return 'Formato de RUC inválido';

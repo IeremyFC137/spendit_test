@@ -19,13 +19,33 @@ class GastosDatasourceImpl extends GastosDatasource {
       String? cGasto,
       String? cContable,
       double? importe,
-      double? pImporte}) {
-    throw UnimplementedError();
+      double? pImporte}) async {
+    final Map<String, dynamic> data = {
+      'id': gastoId,
+    };
+    if (cCosto != null) data['c_costo'] = cCosto;
+    if (cGasto != null) data['c_gasto'] = cGasto;
+    if (cContable != null) data['c_contable'] = cContable;
+    if (importe != 0.0) data['importe'] = importe;
+    if (pImporte != 2.0) data['p_importe'] = pImporte;
+    try {
+      final response = await dio.put("/gastos", data: data);
+      final Gasto gasto = GastoMapper.gastoJsonToEntity(response.data);
+      return gasto;
+    } on DioException catch (e) {
+      if (e.response!.statusCode == 404) {
+        throw GastoNotFound();
+      }
+      throw Exception();
+    } catch (e) {
+      print(e);
+      throw Exception();
+    }
   }
 
   @override
-  Future<void> eliminarGasto(int gastoId) {
-    throw UnimplementedError();
+  Future<void> eliminarGasto(int gastoId) async {
+    await dio.delete("/gastos/${gastoId}");
   }
 
   @override

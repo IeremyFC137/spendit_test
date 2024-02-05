@@ -12,6 +12,7 @@ class CentroCosto extends FormzInput<String, CentroCostoError> {
   const CentroCosto.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case CentroCostoError.empty:
         return 'El campo "Centro de costo" no puede estar vacio';

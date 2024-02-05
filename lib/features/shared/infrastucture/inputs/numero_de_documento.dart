@@ -14,11 +14,12 @@ class DocumentNumber extends FormzInput<String, DocumentNumberError> {
   const DocumentNumber.dirty(String value) : super.dirty(value);
 
   String? get errorMessage {
+    if (isValid || isPure) return null;
     switch (error) {
       case DocumentNumberError.empty:
-        return 'El tipo de documento no puede estar vacío';
+        return 'El número de documento no puede estar vacío';
       case DocumentNumberError.invalidFormat:
-        return 'Tipo de documento inválido';
+        return 'Número de documento inválido';
       default:
         return null;
     }
