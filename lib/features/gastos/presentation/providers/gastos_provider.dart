@@ -120,6 +120,15 @@ class GastosNotifier extends StateNotifier<GastosState> {
       print(e);
     }
   }
+
+  Future<void> eliminarGasto(int gastoId) async {
+    try {
+      await gastosRepository.eliminarGasto(gastoId);
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
 }
 
 class GastosState {

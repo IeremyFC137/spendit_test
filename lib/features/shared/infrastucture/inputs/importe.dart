@@ -5,7 +5,7 @@ enum ImporteInputdError { empty, invalid }
 
 class Importe extends FormzInput<double, ImporteInputdError> {
   const Importe.pure() : super.pure(0.0);
-  const Importe.dirty([double value = 0.0]) : super.dirty(value);
+  const Importe.dirty(value) : super.dirty(value);
 
   String? get errorMessage {
     if (isValid || isPure) return null;

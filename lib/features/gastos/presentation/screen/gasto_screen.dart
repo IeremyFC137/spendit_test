@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,7 +23,7 @@ class GastoScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         duration: Duration(seconds: 4),
-        content: Text('Producto Actualizado')));
+        content: Text('Gasto Actualizado')));
   }
 
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,12 +34,37 @@ class GastoScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
         appBar: AppBarWidget(
-            title: "Editar Gasto", icon: Icon(Icons.camera_alt_outlined)),
+            title: "Editar gasto",
+            icon: Row(
+              children: [
+                IconButton(
+                    onPressed: () async {
+                      final photoPath =
+                          await CameraGalleryServiceImpl().selectPhoto();
+                      if (photoPath == null) return null;
+                      ref
+                          .read(gastoFormProvider(gastoState.gasto!).notifier)
+                          .updateGastoImage(photoPath);
+                    },
+                    icon: Icon(Icons.photo_library_outlined)),
+                IconButton(
+                    onPressed: () async {
+                      final photoPath =
+                          await CameraGalleryServiceImpl().takePhoto();
+                      if (photoPath == null) return null;
+                      ref
+                          .read(gastoFormProvider(gastoState.gasto!).notifier)
+                          .updateGastoImage(photoPath);
+                    },
+                    icon: Icon(Icons.camera_alt_outlined)),
+              ],
+            )),
         body: gastoState.isLoading
             ? FullScreenLoader()
             : _GastoView(gasto: gastoState.gasto!),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
+              if (gastoState.gasto == null) return;
               ref
                   .read(gastoFormProvider(gastoState.gasto!).notifier)
                   .onFormActualizarSubmit()
@@ -52,13 +79,14 @@ class GastoScreen extends ConsumerWidget {
   }
 }
 
-class _GastoView extends StatelessWidget {
+class _GastoView extends ConsumerWidget {
   final Gasto gasto;
 
   const _GastoView({required this.gasto});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final gastoForm = ref.watch(gastoFormProvider(gasto));
     final textStyles = Theme.of(context).textTheme;
 
     return ListView(
@@ -66,7 +94,7 @@ class _GastoView extends StatelessWidget {
         SizedBox(
           height: 250,
           width: 600,
-          child: _ImageGallery(images: []),
+          child: _ImageGallery(images: gastoForm.images),
         ),
         const SizedBox(height: 10),
         Center(child: Text(gasto.proveedor, style: textStyles.titleSmall)),
@@ -171,23 +199,42 @@ class _GastoInformation extends ConsumerWidget {
           CustomGastoField(
             isTopField: true,
             label: 'Importe',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.number,
             initialValue: "${gasto.importe}",
-            onChanged: (values) => ref
-                .read(gastoFormProvider(gasto).notifier)
-                .onImporteChange(double.parse(values)),
+            onChanged: (value) {
+              double? parsedValue = double.tryParse(value);
+              if (parsedValue == null) {
+                ref
+                    .read(gastoFormProvider(gasto).notifier)
+                    .onImporteChange(0.0);
+              } else {
+                ref
+                    .read(gastoFormProvider(gasto).notifier)
+                    .onImporteChange(parsedValue);
+              }
+            },
             errorMessage:
                 gastoForm.isFormPosted ? gastoForm.importe.errorMessage : null,
           ),
           DividerForm(),
           CustomGastoField(
             isTopField: false,
-            label: 'Porcentaje de importe',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            initialValue: "${gasto.pImporte}",
-            onChanged: (values) => ref
-                .read(gastoFormProvider(gasto).notifier)
-                .onPimporteChange(double.parse(values)),
+            label:
+                "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
+            keyboardType: TextInputType.number,
+            initialValue: "${(gasto.pImporte * 100).round()}",
+            onChanged: (value) {
+              double? parsedValue = double.tryParse(value);
+              if (parsedValue == null) {
+                ref
+                    .read(gastoFormProvider(gasto).notifier)
+                    .onPimporteChange(0.0);
+              } else {
+                ref
+                    .read(gastoFormProvider(gasto).notifier)
+                    .onPimporteChange(parsedValue / 100);
+              }
+            },
             validator: (value) {
               if (value == null || value.isEmpty)
                 return 'Este campo es obligatorio';
@@ -259,12 +306,23 @@ class _ImageGallery extends StatelessWidget {
                   child: SvgPicture.asset('assets/img/image.svg',
                       fit: BoxFit.cover))
             ]
-          : images.map((e) {
-              return ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(20)),
-                child: Image.network(
-                  e,
-                  fit: BoxFit.cover,
+          : images.map((image) {
+              late ImageProvider imageProvider;
+              if (image.startsWith("http")) {
+                imageProvider = NetworkImage(image);
+              } else {
+                imageProvider = FileImage(File(image));
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  child: FadeInImage(
+                    fit: BoxFit.cover,
+                    image: imageProvider,
+                    placeholder:
+                        const AssetImage('assets/loaders/bottle-loader.gif'),
+                  ),
                 ),
               );
             }).toList(),

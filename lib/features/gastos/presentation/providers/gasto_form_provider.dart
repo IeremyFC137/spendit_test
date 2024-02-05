@@ -52,7 +52,10 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
             conceptoGasto: ConceptoGasto.dirty(gasto?.cGasto ?? ''),
             cuentaContable: CuentaContable.dirty(gasto?.cContable ?? ''),
             importe: Importe.dirty(gasto?.importe ?? 0.0),
-            pimporte: Pimporte.dirty(gasto?.pImporte ?? 0.0)));
+            pimporte: Pimporte.dirty(
+              gasto?.pImporte ?? 0.0,
+            ),
+            images: gasto?.images ?? []));
 
   onProveedorChange(String value) {
     final newProveedor = Proveedor.dirty(value);
@@ -328,6 +331,10 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
         ]));
   }
 
+  void updateGastoImage(String path) {
+    state = state.copyWith(images: [path]);
+  }
+
   Future<bool> onFormActualizarSubmit() async {
     _touchEveryField();
     if (!state.isValid) return false;
@@ -435,26 +442,27 @@ class GastoFormState {
   final CuentaContable cuentaContable;
   final Importe importe;
   final Pimporte pimporte;
+  final List<String> images;
 
-  GastoFormState({
-    this.isPosting = false,
-    this.isFormPosted = false,
-    this.isValid = false,
-    this.id,
-    this.proveedor = const Proveedor.pure(),
-    this.ruc = const Ruc.pure(),
-    this.tipoDocumento = const DocumentType.pure(),
-    this.numeroDocumento = const DocumentNumber.pure(),
-    this.fechaEmision = const FechaEmision.pure(),
-    this.subTotal = const SubTotal.pure(),
-    this.igv = const Igv.pure(),
-    this.moneda = const MoneyType.pure(),
-    this.centroCosto = const CentroCosto.pure(),
-    this.conceptoGasto = const ConceptoGasto.pure(),
-    this.cuentaContable = const CuentaContable.pure(),
-    this.importe = const Importe.pure(),
-    this.pimporte = const Pimporte.pure(),
-  });
+  GastoFormState(
+      {this.isPosting = false,
+      this.isFormPosted = false,
+      this.isValid = false,
+      this.id,
+      this.proveedor = const Proveedor.pure(),
+      this.ruc = const Ruc.pure(),
+      this.tipoDocumento = const DocumentType.pure(),
+      this.numeroDocumento = const DocumentNumber.pure(),
+      this.fechaEmision = const FechaEmision.pure(),
+      this.subTotal = const SubTotal.pure(),
+      this.igv = const Igv.pure(),
+      this.moneda = const MoneyType.pure(),
+      this.centroCosto = const CentroCosto.pure(),
+      this.conceptoGasto = const ConceptoGasto.pure(),
+      this.cuentaContable = const CuentaContable.pure(),
+      this.importe = const Importe.pure(),
+      this.pimporte = const Pimporte.pure(),
+      this.images = const []});
 
   GastoFormState copyWith(
           {bool? isPosting,
@@ -473,26 +481,27 @@ class GastoFormState {
           ConceptoGasto? conceptoGasto,
           CuentaContable? cuentaContable,
           Importe? importe,
-          Pimporte? pimporte}) =>
+          Pimporte? pimporte,
+          List<String>? images}) =>
       GastoFormState(
-        isPosting: isPosting ?? this.isPosting,
-        isFormPosted: isFormPosted ?? this.isFormPosted,
-        isValid: isValid ?? this.isValid,
-        id: id ?? this.id,
-        proveedor: proveedor ?? this.proveedor,
-        ruc: ruc ?? this.ruc,
-        tipoDocumento: tipoDocumento ?? this.tipoDocumento,
-        numeroDocumento: numeroDocumento ?? this.numeroDocumento,
-        fechaEmision: fechaEmision ?? this.fechaEmision,
-        subTotal: subTotal ?? this.subTotal,
-        igv: igv ?? this.igv,
-        moneda: moneda ?? this.moneda,
-        centroCosto: centroCosto ?? this.centroCosto,
-        conceptoGasto: conceptoGasto ?? this.conceptoGasto,
-        cuentaContable: cuentaContable ?? this.cuentaContable,
-        importe: importe ?? this.importe,
-        pimporte: pimporte ?? this.pimporte,
-      );
+          isPosting: isPosting ?? this.isPosting,
+          isFormPosted: isFormPosted ?? this.isFormPosted,
+          isValid: isValid ?? this.isValid,
+          id: id ?? this.id,
+          proveedor: proveedor ?? this.proveedor,
+          ruc: ruc ?? this.ruc,
+          tipoDocumento: tipoDocumento ?? this.tipoDocumento,
+          numeroDocumento: numeroDocumento ?? this.numeroDocumento,
+          fechaEmision: fechaEmision ?? this.fechaEmision,
+          subTotal: subTotal ?? this.subTotal,
+          igv: igv ?? this.igv,
+          moneda: moneda ?? this.moneda,
+          centroCosto: centroCosto ?? this.centroCosto,
+          conceptoGasto: conceptoGasto ?? this.conceptoGasto,
+          cuentaContable: cuentaContable ?? this.cuentaContable,
+          importe: importe ?? this.importe,
+          pimporte: pimporte ?? this.pimporte,
+          images: images ?? this.images);
 
   @override
   String toString() {

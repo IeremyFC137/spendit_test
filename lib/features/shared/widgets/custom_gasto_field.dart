@@ -17,6 +17,7 @@ class CustomGastoField extends ConsumerWidget {
   final Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
+  final bool enabled;
 
   const CustomGastoField(
       {super.key,
@@ -32,7 +33,8 @@ class CustomGastoField extends ConsumerWidget {
       this.onChanged,
       this.onFieldSubmitted,
       this.validator,
-      this.controller});
+      this.controller,
+      this.enabled = true});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -64,6 +66,7 @@ class CustomGastoField extends ConsumerWidget {
                   offset: const Offset(0, 3))
           ]),
       child: TextFormField(
+        enabled: enabled,
         controller: controller,
         onChanged: onChanged,
         onFieldSubmitted: onFieldSubmitted,

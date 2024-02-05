@@ -58,17 +58,65 @@ class _GastosScreenState extends ConsumerState {
               physics: BouncingScrollPhysics(),
               itemBuilder: (context, index) {
                 final gasto = gastosState.gastos[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Card(
-                    color: Colors.transparent,
-                    elevation: 0,
-                    child: GestureDetector(
-                        onTap: () => context.push('/gastos/${gasto.id}'),
-                        child: GastoCard(gasto: gasto)),
+                // Envuelve GastoCard con Dismissible
+                return Dismissible(
+                  key: Key(gasto.id
+                      .toString()), // Asegúrate de que gasto.id sea único
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(left: 20),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  direction: DismissDirection
+                      .endToStart, // Permite deslizar solo hacia la izquierda
+                  confirmDismiss: (direction) async {
+                    // Muestra un diálogo de confirmación
+                    return await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Confirmar"),
+                          content: const Text(
+                              "¿Estás seguro de que quieres eliminar este gasto?"),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text("Eliminar"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text("Cancelar"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  onDismissed: (direction) async {
+                    // Aquí puedes manejar la lógica de eliminación de tu tarjeta
+                    // Por ejemplo, eliminar la tarjeta de tu estado o base de datos
+                    await ref
+                        .read(gastosProvider.notifier)
+                        .eliminarGasto(gasto.id);
+                    setState(() {
+                      gastosState.gastos.removeAt(index);
+                    });
+                    // Mostrar un snackbar o mensaje de confirmación si lo deseas
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Card(
+                      color: Colors.transparent,
+                      elevation: 0,
+                      child: GestureDetector(
+                          onTap: () => context.push('/gastos/${gasto.id}'),
+                          child: GastoCard(gasto: gasto)),
+                    ),
                   ),
                 );
-              }),
+              },
+            ),
       floatingActionButton: SpeedDial(
         icon: isDialOpen ? Icons.close : Icons.add,
         activeIcon: Icons.close,

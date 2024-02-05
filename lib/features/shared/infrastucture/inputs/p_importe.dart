@@ -5,14 +5,14 @@ enum PimporteInputError { empty, invalid }
 
 class Pimporte extends FormzInput<double, PimporteInputError> {
   const Pimporte.pure() : super.pure(0.0);
-  const Pimporte.dirty(double value) : super.dirty(value);
+  const Pimporte.dirty(value) : super.dirty(value);
 
   String? get errorMessage {
     if (isValid || isPure) return null;
     if (error == PimporteInputError.empty)
       return 'El campo "Porcentaje de importe" no puede ser nulo';
     if (error == PimporteInputError.invalid)
-      return 'El "Porcentaje de importe" debe estar entre 0 y 1';
+      return 'El "Porcentaje de importe" debe estar entre 0 y 100';
     return null;
   }
 

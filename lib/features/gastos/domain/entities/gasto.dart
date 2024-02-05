@@ -17,7 +17,7 @@ class Gasto {
   final String cGasto;
   final String cContable;
   final String estado;
-
+  List<String> images;
   Gasto(
       {required this.id,
       required this.idUsuario,
@@ -34,5 +34,6 @@ class Gasto {
       required this.cCosto,
       required this.cGasto,
       required this.cContable,
-      required this.estado});
+      required this.estado,
+      required this.images});
 }

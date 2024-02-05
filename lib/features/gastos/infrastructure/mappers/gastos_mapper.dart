@@ -18,5 +18,6 @@ class GastoMapper {
       cCosto: json["c_costo"],
       cGasto: json["c_gasto"],
       cContable: json["c_contable"],
-      estado: json["estado"]);
+      estado: json["estado"],
+      images: List<String>.from(json['imagenes'] ?? []));
 }

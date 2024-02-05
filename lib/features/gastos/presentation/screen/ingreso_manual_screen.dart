@@ -103,9 +103,13 @@ class _GastoForm extends ConsumerWidget {
               items: getTipoDocumentoItems(),
               isTopField: false,
               label: 'Tipo de documento',
-              onChanged: (value) => ref
-                  .read(gastoFormProvider(null).notifier)
-                  .onTipoDocumentoChange,
+              onChanged: (TipoDocumento? newValue) {
+                if (newValue != null) {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onTipoDocumentoChange(newValue);
+                }
+              },
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.tipoDocumento.errorMessage
                   : null,
@@ -117,8 +121,13 @@ class _GastoForm extends ConsumerWidget {
               isTopField: false,
               items: getMonedaItems(),
               label: 'Tipo de moneda',
-              onChanged: (value) =>
-                  ref.read(gastoFormProvider(null).notifier).onMonedaChange,
+              onChanged: (Moneda? newValue) {
+                if (newValue != null) {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onMonedaChange(newValue);
+                }
+              },
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.moneda.errorMessage : null,
             ),
@@ -258,9 +267,18 @@ class _GastoForm extends ConsumerWidget {
               label: 'Importe',
               isTopField: false,
               keyboardType: TextInputType.number,
-              onChanged: (values) => ref
-                  .read(gastoFormProvider(null).notifier)
-                  .onImporteChange(double.parse(values)),
+              onChanged: (value) {
+                double? parsedValue = double.tryParse(value);
+                if (parsedValue == null) {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onImporteChange(0.0);
+                } else {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onImporteChange(parsedValue);
+                }
+              },
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.importe.errorMessage
                   : null,
@@ -272,9 +290,18 @@ class _GastoForm extends ConsumerWidget {
                   "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
               keyboardType: TextInputType.number,
               isBottomField: true,
-              onChanged: (values) => ref
-                  .read(gastoFormProvider(null).notifier)
-                  .onPimporteChange(double.parse(values)),
+              onChanged: (value) {
+                double? parsedValue = double.tryParse(value);
+                if (parsedValue == null) {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onPimporteChange(0.0);
+                } else {
+                  ref
+                      .read(gastoFormProvider(null).notifier)
+                      .onPimporteChange(parsedValue / 100);
+                }
+              },
               validator: (value) {
                 if (value == null || value.isEmpty)
                   return 'Este campo es obligatorio';

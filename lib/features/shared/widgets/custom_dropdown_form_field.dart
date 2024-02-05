@@ -13,6 +13,7 @@ class CustomDropdownFormField<T> extends ConsumerWidget {
   final int maxLines;
   final String? errorMessage;
   final Function(T?)? onChanged;
+  final bool enabled;
 
   const CustomDropdownFormField(
       {super.key,
@@ -24,7 +25,8 @@ class CustomDropdownFormField<T> extends ConsumerWidget {
       this.errorMessage,
       this.onChanged,
       this.isTopField = false,
-      this.isBottomField = false});
+      this.isBottomField = false,
+      this.enabled = true});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -56,7 +58,7 @@ class CustomDropdownFormField<T> extends ConsumerWidget {
           ]),
       child: DropdownButtonFormField<T>(
         value: value,
-        onChanged: onChanged,
+        onChanged: enabled ? onChanged : null,
         items: items,
         style: const TextStyle(fontSize: 20, color: Colors.black54),
         dropdownColor: !ref.read(themeNotifierProvider).isDarkmode
