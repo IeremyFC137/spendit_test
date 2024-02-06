@@ -46,19 +46,29 @@ final goRouterProvider = Provider((ref) {
         ),
       ),
       GoRoute(
-        path: '/gastos/ingreso-manual',
-        name: IngresoManualScreen.name,
-        pageBuilder: (context, state) => _fadeTransitionPage(
-          key: state.pageKey,
-          child: const IngresoManualScreen(),
-        ),
-      ),
+          path: '/gastos/ingreso-manual',
+          name: IngresoManualScreen.name,
+          pageBuilder: (context, state) {
+            final formData = state.extra as Map<String, dynamic>?;
+            return _fadeTransitionPage(
+              key: state.pageKey,
+              child: IngresoManualScreen(formData: formData),
+            );
+          }),
       GoRoute(
         path: '/gastos/scanit',
         name: ScanitScreen.name,
         pageBuilder: (context, state) => _fadeTransitionPage(
           key: state.pageKey,
           child: const ScanitScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/gastos/qr-scanner',
+        name: QRScannerScreen.name,
+        pageBuilder: (context, state) => _fadeTransitionPage(
+          key: state.pageKey,
+          child: const QRScannerScreen(),
         ),
       ),
       GoRoute(

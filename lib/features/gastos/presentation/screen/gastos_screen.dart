@@ -9,6 +9,7 @@ import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 import 'package:spendit_test/features/shared/shared.dart';
 
 import '../../../auth/presentation/providers/providers.dart';
+//import '../../infrastructure/mappers/mappers.dart';
 
 class GastosScreen extends ConsumerStatefulWidget {
   static const name = "gastos_screen";
@@ -155,7 +156,11 @@ class _GastosScreenState extends ConsumerState {
               labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
               labelBackgroundColor: Colors.transparent,
               labelShadow: [],
-              onTap: () => print("Escanear código"),
+              onTap: () {
+                // Navegar a QRScannerScreen sin esperar un retorno de datos
+                context.push('/gastos/qr-scanner');
+                // La lógica para manejar los datos del QR y navegar a IngresoManualScreen se implementa en QRScannerScreen
+              },
               shape: CircleBorder()),
           SpeedDialChild(
               child: FaIcon(FontAwesomeIcons.filePen,

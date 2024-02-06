@@ -12,7 +12,8 @@ import '../../domain/domain.dart';
 
 class IngresoManualScreen extends StatelessWidget {
   static const name = "ingreso_manual_screen";
-  const IngresoManualScreen({super.key});
+  final Map<String, dynamic>? formData;
+  const IngresoManualScreen({super.key, this.formData});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class IngresoManualScreen extends StatelessWidget {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
-        appBar: AppBarWidget(title: "Ingreso manual"),
+        appBar: AppBarWidget(title: "Registro de gasto"),
         body: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: Column(
@@ -34,7 +35,9 @@ class IngresoManualScreen extends StatelessWidget {
                     borderRadius:
                         const BorderRadius.only(topLeft: Radius.circular(100)),
                   ),
-                  child: const _GastoForm(),
+                  child: _GastoForm(
+                    formData: formData,
+                  ),
                 ),
               ],
             )),
@@ -44,11 +47,13 @@ class IngresoManualScreen extends StatelessWidget {
 }
 
 class _GastoForm extends ConsumerWidget {
-  const _GastoForm();
+  final Map<String, dynamic>? formData;
+  const _GastoForm({this.formData});
   @override
   Widget build(BuildContext context, ref) {
     final gastoForm = ref.watch(gastoFormProvider(null));
     print(gastoForm);
+    print(formData);
     final colors = Theme.of(context).colorScheme;
     return Padding(
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
