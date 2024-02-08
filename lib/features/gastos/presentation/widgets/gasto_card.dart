@@ -33,7 +33,7 @@ class GastoCard extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Text(
-              ((gasto.igv + gasto.subTotal).toString()) +
+              ((gasto.igv + gasto.subTotal).toStringAsFixed(2)) +
                   "${gasto.moneda == Moneda.SOLES ? " PEN" : " USD"}",
               style:
                   TextStyle(color: Colors.black, fontWeight: FontWeight.bold),

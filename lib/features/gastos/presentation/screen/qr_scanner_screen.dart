@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 
 import '../../infrastructure/mappers/parse_qr_data.dart';
@@ -13,27 +14,49 @@ class QRScannerScreen extends StatefulWidget {
   State<QRScannerScreen> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+// Extiende de StatefulWidget y mezcla con WidgetsBindingObserver
+class _QRScannerScreenState extends State<QRScannerScreen>
+    with WidgetsBindingObserver {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
 
+  // Registra el observador en initState
   @override
-  void reassemble() {
-    super.reassemble();
-    if (controller != null) {
-      controller!.pauseCamera();
-      controller!.resumeCamera();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // Implementa didChangeAppLifecycleState para manejar la pausa y reanudación de la cámara
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // La app se ha reanudado, intenta reanudar la cámara
+      controller?.resumeCamera();
+    } else if (state == AppLifecycleState.paused) {
+      // La app se ha pausado, intenta pausar la cámara
+      controller?.pauseCamera();
     }
+  }
+
+  // Asegúrate de remover el observador en dispose
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    controller?.dispose();
+    super.dispose();
   }
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
-      controller.pauseCamera(); // Opcional: pausa la cámara después de escanear
-      final Map<String, dynamic> formData = parseQRData(
-          scanData.code ?? ''); // Usa tu función existente para parsear datos
-      // Usa go_router para navegar a IngresoManualScreen con los datos parseados
-      GoRouter.of(context).go('/gastos/ingreso-manual', extra: formData);
+      // Pausa la cámara antes de navegar
+      controller.pauseCamera();
+      final GastoLike gastoLike = parseQRData(scanData.code ?? '');
+      // Navega a la pantalla de ingreso manual con los datos del formulario
+      GoRouter.of(context)
+          .pushReplacement('/gastos/ingreso-manual', extra: gastoLike);
     });
   }
 
@@ -53,11 +76,5 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
   }
 }

@@ -6,3 +6,4 @@ export 'fast_access_widget.dart';
 export 'custom_dropdown_form_field.dart';
 export 'full_screen_loader.dart';
 export 'custom_gasto_field.dart';
+export 'app_bar_widget.dart';

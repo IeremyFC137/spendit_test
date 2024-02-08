@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
 
@@ -72,8 +74,12 @@ class GastosRepositoryImpl extends GastosRepository {
   }
 
   @override
+  Future<GastoLike> enviarImagen(File imagen) {
+    return datasource.enviarImagen(imagen);
+  }
+
+  @override
   Future<void> validarGastoConSunat() {
-    // TODO: implement validarGastoConSunat
     throw UnimplementedError();
   }
 }

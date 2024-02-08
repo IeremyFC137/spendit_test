@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../entities/entities.dart';
 
 abstract class GastosDatasource {
@@ -30,6 +32,8 @@ abstract class GastosDatasource {
       double? pImporte});
 
   Future<List<Gasto>> listarGastos({int size = 7, int page = 0});
+
+  Future<GastoLike> enviarImagen(File imagen);
 
   Future<void> validarGastoConSunat();
 }

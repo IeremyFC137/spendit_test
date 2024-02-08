@@ -62,6 +62,7 @@ class _LoginForm extends ConsumerWidget {
   const _LoginForm();
 
   void showSnackbar(BuildContext context, String message) {
+    print(message);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red));

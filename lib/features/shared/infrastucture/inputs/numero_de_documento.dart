@@ -6,7 +6,7 @@ enum DocumentNumberError { empty, invalidFormat }
 class DocumentNumber extends FormzInput<String, DocumentNumberError> {
   // La expresión regular para validar la serie de boleta o factura.
   static final RegExp documentNumberRegExp = RegExp(
-    r'\b([FBfb]\d{3}-\d{3,10}|\d{1,5}-\d{5,10})\b',
+    r'\b([FfBbEeRr]\d{3}-\d{3,10}|\d{1,5}-\d{5,10})\b',
   );
 
   const DocumentNumber.pure() : super.pure('');

@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
+import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
 import 'package:spendit_test/features/shared/shared.dart';
 import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
@@ -29,6 +30,26 @@ class GastoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gastoState = ref.watch(gastoProvider(int.parse(gastoId)));
+    GastoLike gastoLike = GastoLikeMapper.gastoToGastoLikeEntity(
+        gastoState.gasto ??
+            Gasto(
+                id: 0,
+                idUsuario: 0,
+                proveedor: '',
+                ruc: '',
+                tipoDocumento: TipoDocumento.BOLETA,
+                documento: '',
+                fechaEmision: DateTime.now(),
+                subTotal: 0.0,
+                igv: 0.0,
+                importe: 0.0,
+                pImporte: 0.0,
+                moneda: Moneda.SOLES,
+                cCosto: '',
+                cGasto: '',
+                cContable: '',
+                estado: '',
+                images: []));
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -43,7 +64,7 @@ class GastoScreen extends ConsumerWidget {
                           await CameraGalleryServiceImpl().selectPhoto();
                       if (photoPath == null) return null;
                       ref
-                          .read(gastoFormProvider(gastoState.gasto!).notifier)
+                          .read(gastoFormProvider(gastoLike).notifier)
                           .updateGastoImage(photoPath);
                     },
                     icon: Icon(Icons.photo_library_outlined)),
@@ -53,7 +74,7 @@ class GastoScreen extends ConsumerWidget {
                           await CameraGalleryServiceImpl().takePhoto();
                       if (photoPath == null) return null;
                       ref
-                          .read(gastoFormProvider(gastoState.gasto!).notifier)
+                          .read(gastoFormProvider(gastoLike).notifier)
                           .updateGastoImage(photoPath);
                     },
                     icon: Icon(Icons.camera_alt_outlined)),
@@ -61,12 +82,12 @@ class GastoScreen extends ConsumerWidget {
             )),
         body: gastoState.isLoading
             ? FullScreenLoader()
-            : _GastoView(gasto: gastoState.gasto!),
+            : _GastoView(gastoLike: gastoLike),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               if (gastoState.gasto == null) return;
               ref
-                  .read(gastoFormProvider(gastoState.gasto!).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onFormActualizarSubmit()
                   .then((value) {
                 if (!value) return;
@@ -80,13 +101,13 @@ class GastoScreen extends ConsumerWidget {
 }
 
 class _GastoView extends ConsumerWidget {
-  final Gasto gasto;
+  final GastoLike gastoLike;
 
-  const _GastoView({required this.gasto});
+  const _GastoView({required this.gastoLike});
 
   @override
   Widget build(BuildContext context, ref) {
-    final gastoForm = ref.watch(gastoFormProvider(gasto));
+    final gastoForm = ref.watch(gastoFormProvider(gastoLike));
     final textStyles = Theme.of(context).textTheme;
 
     return ListView(
@@ -97,24 +118,25 @@ class _GastoView extends ConsumerWidget {
           child: _ImageGallery(images: gastoForm.images),
         ),
         const SizedBox(height: 10),
-        Center(child: Text(gasto.proveedor, style: textStyles.titleSmall)),
+        Center(child: Text(gastoLike.proveedor!, style: textStyles.titleSmall)),
         const SizedBox(height: 20),
-        _GastoInformation(gasto: gasto),
+        _GastoInformation(gastoLike: gastoLike),
       ],
     );
   }
 }
 
 class _GastoInformation extends ConsumerWidget {
-  final Gasto gasto;
+  final GastoLike gastoLike;
 
-  const _GastoInformation({required this.gasto});
+  const _GastoInformation({required this.gastoLike});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
-    final gastoForm = ref.watch(gastoFormProvider(gasto));
+    final gastoForm = ref.watch(gastoFormProvider(gastoLike));
     print(gastoForm);
+    print(gastoLike);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -145,39 +167,39 @@ class _GastoInformation extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               Text(
-                gasto.proveedor,
+                gastoLike.proveedor!,
                 style: TextStyle(fontSize: 20, color: Colors.black54),
               ),
               Text("Ruc",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.ruc,
+              Text(gastoLike.ruc!,
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Tipo de documento",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.tipoDocumento.name,
+              Text(gastoLike.tipoDocumento!.name,
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Moneda",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.moneda.name,
+              Text(gastoLike.moneda!.name,
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Numero de documento",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.documento,
+              Text(gastoLike.documento!,
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Fecha de emisión",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               Text(
                   DateFormat('yyyy-MM-dd')
-                      .format(gasto.fechaEmision)
+                      .format(gastoLike.fechaEmision!)
                       .toString(),
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Sub total",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.subTotal.toString(),
+              Text(gastoLike.subTotal!.toString(),
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
               Text("Igv",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(gasto.igv.toString(),
+              Text(gastoLike.igv!.toString(),
                   style: TextStyle(fontSize: 20, color: Colors.black54)),
             ]),
           ),
@@ -200,16 +222,16 @@ class _GastoInformation extends ConsumerWidget {
             isTopField: true,
             label: 'Importe',
             keyboardType: TextInputType.number,
-            initialValue: "${gasto.importe}",
+            initialValue: "${gastoLike.importe!}",
             onChanged: (value) {
               double? parsedValue = double.tryParse(value);
               if (parsedValue == null) {
                 ref
-                    .read(gastoFormProvider(gasto).notifier)
+                    .read(gastoFormProvider(gastoLike).notifier)
                     .onImporteChange(0.0);
               } else {
                 ref
-                    .read(gastoFormProvider(gasto).notifier)
+                    .read(gastoFormProvider(gastoLike).notifier)
                     .onImporteChange(parsedValue);
               }
             },
@@ -222,16 +244,16 @@ class _GastoInformation extends ConsumerWidget {
             label:
                 "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
             keyboardType: TextInputType.number,
-            initialValue: "${(gasto.pImporte * 100).round()}",
+            initialValue: "${(gastoLike.pImporte! * 100).round()}",
             onChanged: (value) {
               double? parsedValue = double.tryParse(value);
               if (parsedValue == null) {
                 ref
-                    .read(gastoFormProvider(gasto).notifier)
+                    .read(gastoFormProvider(gastoLike).notifier)
                     .onPimporteChange(0.0);
               } else {
                 ref
-                    .read(gastoFormProvider(gasto).notifier)
+                    .read(gastoFormProvider(gastoLike).notifier)
                     .onPimporteChange(parsedValue / 100);
               }
             },
@@ -251,9 +273,10 @@ class _GastoInformation extends ConsumerWidget {
           CustomGastoField(
             isTopField: false,
             label: 'Centro de costo',
-            initialValue: gasto.cCosto,
-            onChanged:
-                ref.read(gastoFormProvider(gasto).notifier).onCentroCostoChange,
+            initialValue: gastoLike.cCosto!,
+            onChanged: ref
+                .read(gastoFormProvider(gastoLike).notifier)
+                .onCentroCostoChange,
             errorMessage: gastoForm.isFormPosted
                 ? gastoForm.centroCosto.errorMessage
                 : null,
@@ -262,9 +285,9 @@ class _GastoInformation extends ConsumerWidget {
           CustomGastoField(
             isTopField: false,
             label: 'Concepto de gasto',
-            initialValue: gasto.cGasto,
+            initialValue: gastoLike.cGasto!,
             onChanged: ref
-                .read(gastoFormProvider(gasto).notifier)
+                .read(gastoFormProvider(gastoLike).notifier)
                 .onConceptoGastoChange,
             errorMessage: gastoForm.isFormPosted
                 ? gastoForm.conceptoGasto.errorMessage
@@ -275,9 +298,9 @@ class _GastoInformation extends ConsumerWidget {
             isTopField: false,
             isBottomField: true,
             label: 'Cuenta contable',
-            initialValue: gasto.cContable,
+            initialValue: gastoLike.cContable!,
             onChanged: ref
-                .read(gastoFormProvider(gasto).notifier)
+                .read(gastoFormProvider(gastoLike).notifier)
                 .onCuentaContableChange,
             errorMessage: gastoForm.isFormPosted
                 ? gastoForm.cuentaContable.errorMessage

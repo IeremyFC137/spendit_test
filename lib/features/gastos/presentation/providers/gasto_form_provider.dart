@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
 import 'package:spendit_test/features/auth/presentation/providers/auth_provider.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
-import 'package:spendit_test/features/gastos/infrastructure/mappers/mapper_utils.dart';
+
 import 'package:spendit_test/features/gastos/presentation/providers/gastos_provider.dart';
 import '../../../auth/domain/domain.dart';
 import '../../../shared/infrastucture/inputs/inputs.dart';
+import '../../../shared/shared.dart';
 
 final gastoFormProvider = StateNotifierProvider.autoDispose
-    .family<GastoFormNotifier, GastoFormState, Gasto?>((ref, gasto) {
+    .family<GastoFormNotifier, GastoFormState, GastoLike?>((ref, gastoLike) {
   final gastoRegistrarCallback =
       ref.watch(gastosProvider.notifier).registrarGasto;
   final gastoActualizarCallback =
@@ -19,7 +20,7 @@ final gastoFormProvider = StateNotifierProvider.autoDispose
       gastoRegistrarCallback: gastoRegistrarCallback,
       gastoActualizarCallback: gastoActualizarCallback,
       user: user,
-      gasto: gasto);
+      gastoLike: gastoLike);
 });
 
 class GastoFormNotifier extends StateNotifier<GastoFormState> {
@@ -29,33 +30,32 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   GastoFormNotifier(
       {required this.gastoRegistrarCallback,
       required this.user,
-      Gasto? gasto,
+      GastoLike? gastoLike,
       required this.gastoActualizarCallback})
       : super(GastoFormState(
-            id: gasto?.id,
-            isValid: gasto == null ? false : true,
-            proveedor: Proveedor.dirty(gasto?.proveedor ?? ""),
-            ruc: Ruc.dirty(gasto?.ruc ?? ""),
+            id: gastoLike?.id,
+            proveedor: Proveedor.dirty(gastoLike?.proveedor ?? ""),
+            ruc: Ruc.dirty(gastoLike?.ruc ?? ""),
             tipoDocumento: DocumentType.dirty(
-                gasto?.tipoDocumento ?? TipoDocumento.BOLETA),
-            numeroDocumento: DocumentNumber.dirty(gasto?.documento ?? ''),
+                gastoLike?.tipoDocumento ?? TipoDocumento.BOLETA),
+            numeroDocumento: DocumentNumber.dirty(gastoLike?.documento ?? ''),
             fechaEmision: FechaEmision.dirty(DateFormat('yyyy-MM-dd').format(
-                        gasto?.fechaEmision ?? DateTime(2024, 01, 01))) ==
+                        gastoLike?.fechaEmision ?? DateTime(2024, 01, 01))) ==
                     FechaEmision.dirty("2024-01-01")
                 ? FechaEmision.dirty('')
                 : FechaEmision.dirty(
-                    DateFormat('yyyy-MM-dd').format(gasto!.fechaEmision)),
-            subTotal: SubTotal.dirty(gasto?.subTotal ?? 0.0),
-            igv: Igv.dirty(gasto?.igv ?? 0.0),
-            moneda: MoneyType.dirty(gasto?.moneda ?? Moneda.SOLES),
-            centroCosto: CentroCosto.dirty(gasto?.cCosto ?? ''),
-            conceptoGasto: ConceptoGasto.dirty(gasto?.cGasto ?? ''),
-            cuentaContable: CuentaContable.dirty(gasto?.cContable ?? ''),
-            importe: Importe.dirty(gasto?.importe ?? 0.0),
+                    DateFormat('yyyy-MM-dd').format(gastoLike!.fechaEmision!)),
+            subTotal: SubTotal.dirty(gastoLike?.subTotal ?? 0.0),
+            igv: Igv.dirty(gastoLike?.igv ?? 0.0),
+            moneda: MoneyType.dirty(gastoLike?.moneda ?? Moneda.SOLES),
+            centroCosto: CentroCosto.dirty(gastoLike?.cCosto ?? ''),
+            conceptoGasto: ConceptoGasto.dirty(gastoLike?.cGasto ?? ''),
+            cuentaContable: CuentaContable.dirty(gastoLike?.cContable ?? ''),
+            importe: Importe.dirty(gastoLike?.importe ?? 0.0),
             pimporte: Pimporte.dirty(
-              gasto?.pImporte ?? 0.0,
+              gastoLike?.pImporte ?? 0.0,
             ),
-            images: gasto?.images ?? []));
+            images: gastoLike?.images ?? []));
 
   onProveedorChange(String value) {
     final newProveedor = Proveedor.dirty(value);
@@ -351,7 +351,6 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
       state = state.copyWith(isPosting: false);
       return isSuccess;
     } catch (e) {
-      print(e);
       Exception(e);
       state = state.copyWith(isPosting: false);
       return false;
@@ -364,6 +363,15 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
     if (!state.isValid) return false;
     state = state.copyWith(isPosting: true);
 
+    DateTime? fechaEmisionParsed = parseFechaEmision(state.fechaEmision.value);
+    if (fechaEmisionParsed == null) {
+      print(state.fechaEmision.value);
+      print("Fecha de emisión no es válida o está en un formato incorrecto.");
+      // Maneja el caso de fecha nula aquí. Podrías establecer isPosting a false y retornar false.
+      state = state.copyWith(isPosting: false);
+      return false;
+    }
+
     try {
       await gastoRegistrarCallback(
         user?.id, // Asegúrate de manejar el caso en que user sea null.
@@ -371,7 +379,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
         state.ruc.value,
         state.tipoDocumento.value,
         state.numeroDocumento.value,
-        parseFechaEmision(state.fechaEmision.value),
+        fechaEmisionParsed,
         state.subTotal.value,
         state.igv.value,
         state.importe.value,
@@ -506,7 +514,9 @@ class GastoFormState {
   @override
   String toString() {
     return '''
+
       GastoFormState:
+      ---------------
         isPosting: $isPosting
         isFormPosted: $isFormPosted
         isValid: $isValid

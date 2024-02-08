@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:spendit_test/config/config.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
+
+import '../../../shared/shared.dart';
 
 class GastosDatasourceImpl extends GastosDatasource {
   late final Dio dio;
@@ -112,8 +116,26 @@ class GastosDatasourceImpl extends GastosDatasource {
   }
 
   @override
+  Future<GastoLike> enviarImagen(File imagen) async {
+    print("datasource");
+    print(imagen.path);
+    FormData formData = FormData.fromMap({
+      "file": await MultipartFile.fromFile(imagen.path, filename: "upload.jpg"),
+    });
+
+    final response = await dio.post("/scanit", data: formData);
+
+    if (response.statusCode == 200) {
+      GastoLike gastoLike =
+          GastoLikeMapper.scanitJsonToGastoLikeEntity(response.data);
+      return gastoLike;
+    } else {
+      throw Exception('Error al enviar imagen');
+    }
+  }
+
+  @override
   Future<void> validarGastoConSunat() {
-    // TODO: implement validarGastoConSunat
     throw UnimplementedError();
   }
 }

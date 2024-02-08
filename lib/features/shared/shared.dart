@@ -1,6 +1,8 @@
 export 'widgets/widgets.dart';
 export 'infrastucture/inputs/inputs.dart';
 
+export 'utils/utils.dart';
+
 export 'infrastucture/services/camera_gallery_service.dart';
 export 'infrastucture/services/camera_gallery_service_impl.dart';
 

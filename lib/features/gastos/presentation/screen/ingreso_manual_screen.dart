@@ -3,21 +3,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:spendit_test/features/gastos/presentation/providers/gasto_form_provider.dart';
+import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
 import 'package:spendit_test/features/gastos/presentation/widgets/widgets.dart';
-import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
-
 import '../../../shared/shared.dart';
 import '../../domain/domain.dart';
 
-class IngresoManualScreen extends StatelessWidget {
+class IngresoManualScreen extends StatefulWidget {
   static const name = "ingreso_manual_screen";
-  final Map<String, dynamic>? formData;
-  const IngresoManualScreen({super.key, this.formData});
+  final GastoLike? gastoLike;
+
+  const IngresoManualScreen({super.key, this.gastoLike});
+
+  @override
+  State<IngresoManualScreen> createState() => _IngresoManualScreenState();
+}
+
+class _IngresoManualScreenState extends State<IngresoManualScreen> {
+  late TextEditingController fechaEmisionController;
+  @override
+  void initState() {
+    super.initState();
+    fechaEmisionController =
+        widget.gastoLike != null && widget.gastoLike?.fechaEmision != null
+            ? TextEditingController(
+                text: DateFormat('yyyy-MM-dd')
+                    .format(widget.gastoLike!.fechaEmision!))
+            : TextEditingController(text: '');
+  }
+
+  @override
+  void dispose() {
+    fechaEmisionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -36,8 +59,8 @@ class IngresoManualScreen extends StatelessWidget {
                         const BorderRadius.only(topLeft: Radius.circular(100)),
                   ),
                   child: _GastoForm(
-                    formData: formData,
-                  ),
+                      gastoLike: widget.gastoLike,
+                      fechaEmisionController: fechaEmisionController),
                 ),
               ],
             )),
@@ -47,13 +70,18 @@ class IngresoManualScreen extends StatelessWidget {
 }
 
 class _GastoForm extends ConsumerWidget {
-  final Map<String, dynamic>? formData;
-  const _GastoForm({this.formData});
+  final GastoLike? gastoLike;
+  final TextEditingController fechaEmisionController;
+  const _GastoForm({
+    this.gastoLike,
+    required this.fechaEmisionController,
+  });
+
   @override
   Widget build(BuildContext context, ref) {
-    final gastoForm = ref.watch(gastoFormProvider(null));
+    final gastoForm = ref.watch(gastoFormProvider(gastoLike));
     print(gastoForm);
-    print(formData);
+    print(gastoLike);
     final colors = Theme.of(context).colorScheme;
     return Padding(
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
@@ -83,9 +111,11 @@ class _GastoForm extends ConsumerWidget {
               maxLines: 2,
               label: 'Proveedor',
               isTopField: true,
-              keyboardType: TextInputType.text,
-              onChanged:
-                  ref.read(gastoFormProvider(null).notifier).onProveedorChange,
+              initialValue: gastoLike?.proveedor ?? "",
+              keyboardType: TextInputType.number,
+              onChanged: ref
+                  .read(gastoFormProvider(gastoLike).notifier)
+                  .onProveedorChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.proveedor.errorMessage
                   : null,
@@ -94,24 +124,27 @@ class _GastoForm extends ConsumerWidget {
             CustomGastoField(
               maxLines: 2,
               label: 'Ruc',
+              initialValue: gastoLike?.ruc ?? '',
               keyboardType: TextInputType.text,
               isTopField: false,
-              onChanged: ref.read(gastoFormProvider(null).notifier).onRucChange,
+              onChanged:
+                  ref.read(gastoFormProvider(gastoLike).notifier).onRucChange,
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.ruc.errorMessage : null,
             ),
             DividerForm(),
             CustomDropdownFormField<TipoDocumento>(
               maxLines: 2,
-              value:
-                  gastoForm.tipoDocumento.value, // Valor actual del formulario
+              value: parseStringToDocumentType(
+                      gastoLike?.tipoDocumento.toString() ?? '') ??
+                  gastoForm.tipoDocumento.value,
               items: getTipoDocumentoItems(),
               isTopField: false,
               label: 'Tipo de documento',
               onChanged: (TipoDocumento? newValue) {
                 if (newValue != null) {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onTipoDocumentoChange(newValue);
                 }
               },
@@ -122,14 +155,15 @@ class _GastoForm extends ConsumerWidget {
             DividerForm(),
             CustomDropdownFormField<Moneda>(
               maxLines: 2,
-              value: gastoForm.moneda.value, // Valor actual del formulario
+              value: parseStringToMoneda(gastoLike?.moneda.toString() ?? '') ??
+                  gastoForm.moneda.value, // Valor actual del formulario
               isTopField: false,
               items: getMonedaItems(),
               label: 'Tipo de moneda',
               onChanged: (Moneda? newValue) {
                 if (newValue != null) {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onMonedaChange(newValue);
                 }
               },
@@ -140,10 +174,11 @@ class _GastoForm extends ConsumerWidget {
             CustomGastoField(
               maxLines: 2,
               label: 'Numero de documento',
+              initialValue: gastoLike?.documento ?? '',
               isTopField: false,
               keyboardType: TextInputType.text,
               onChanged: ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onNumeroDocumentoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.numeroDocumento.errorMessage
@@ -162,8 +197,9 @@ class _GastoForm extends ConsumerWidget {
                 if (pickedDate != null) {
                   String formattedDate =
                       DateFormat('yyyy-MM-dd').format(pickedDate);
+                  fechaEmisionController.text = formattedDate;
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onFechaEmisionChange(formattedDate);
                 }
               },
@@ -173,12 +209,11 @@ class _GastoForm extends ConsumerWidget {
                   label: 'Fecha de emisión',
                   //isTopField: false,
                   keyboardType: TextInputType.datetime,
-                  onChanged: (_) {}, // La lógica del cambio se maneja en onTap
+                  onChanged: (_) {},
                   errorMessage: gastoForm.isFormPosted
                       ? gastoForm.fechaEmision.errorMessage
                       : null,
-                  controller:
-                      TextEditingController(text: gastoForm.fechaEmision.value),
+                  controller: fechaEmisionController,
                 ),
               ),
             ),
@@ -187,9 +222,10 @@ class _GastoForm extends ConsumerWidget {
               maxLines: 2,
               label: 'Sub Total',
               isTopField: false,
+              initialValue: gastoLike?.subTotal.toString() ?? '',
               keyboardType: TextInputType.number,
               onChanged: (value) => ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onSubTotalChange(double.parse(value)),
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.subTotal.errorMessage
@@ -199,10 +235,11 @@ class _GastoForm extends ConsumerWidget {
             CustomGastoField(
               maxLines: 2,
               label: 'IGV',
+              initialValue: gastoLike?.igv.toString() ?? '',
               isBottomField: true,
               keyboardType: TextInputType.number,
               onChanged: (value) => ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onIgvChange(double.parse(value)),
               errorMessage:
                   gastoForm.isFormPosted ? gastoForm.igv.errorMessage : null,
@@ -234,7 +271,7 @@ class _GastoForm extends ConsumerWidget {
               isTopField: true,
               keyboardType: TextInputType.text,
               onChanged: ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onCentroCostoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.centroCosto.errorMessage
@@ -247,7 +284,7 @@ class _GastoForm extends ConsumerWidget {
               isTopField: false,
               keyboardType: TextInputType.text,
               onChanged: ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onConceptoGastoChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.conceptoGasto.errorMessage
@@ -260,7 +297,7 @@ class _GastoForm extends ConsumerWidget {
               isTopField: false,
               keyboardType: TextInputType.text,
               onChanged: ref
-                  .read(gastoFormProvider(null).notifier)
+                  .read(gastoFormProvider(gastoLike).notifier)
                   .onCuentaContableChange,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.cuentaContable.errorMessage
@@ -276,11 +313,11 @@ class _GastoForm extends ConsumerWidget {
                 double? parsedValue = double.tryParse(value);
                 if (parsedValue == null) {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onImporteChange(0.0);
                 } else {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onImporteChange(parsedValue);
                 }
               },
@@ -299,11 +336,11 @@ class _GastoForm extends ConsumerWidget {
                 double? parsedValue = double.tryParse(value);
                 if (parsedValue == null) {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onPimporteChange(0.0);
                 } else {
                   ref
-                      .read(gastoFormProvider(null).notifier)
+                      .read(gastoFormProvider(gastoLike).notifier)
                       .onPimporteChange(parsedValue / 100);
                 }
               },
@@ -334,7 +371,7 @@ class _GastoForm extends ConsumerWidget {
                       ? null
                       : () async {
                           final isSuccess = await ref
-                              .read(gastoFormProvider(null).notifier)
+                              .read(gastoFormProvider(gastoLike).notifier)
                               .onFormSubmit();
                           if (isSuccess) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -366,24 +403,4 @@ class _GastoForm extends ConsumerWidget {
           ],
         ));
   }
-}
-
-List<DropdownMenuItem<TipoDocumento>> getTipoDocumentoItems() {
-  return TipoDocumento.values.map((TipoDocumento tipo) {
-    return DropdownMenuItem<TipoDocumento>(
-      value: tipo,
-      child:
-          Text(tipo.name), // Usando el getter 'name' en lugar de 'describeEnum'
-    );
-  }).toList();
-}
-
-List<DropdownMenuItem<Moneda>> getMonedaItems() {
-  return Moneda.values.map((Moneda tipo) {
-    return DropdownMenuItem<Moneda>(
-      value: tipo,
-      child:
-          Text(tipo.name), // Usando el getter 'name' en lugar de 'describeEnum'
-    );
-  }).toList();
 }

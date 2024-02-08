@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:spendit_test/features/gastos/domain/domain.dart';
@@ -118,6 +120,19 @@ class GastosNotifier extends StateNotifier<GastosState> {
     } catch (e) {
       state.copyWith(isLoading: false);
       print(e);
+    }
+  }
+
+  Future<GastoLike?> enviarImagen(File imagen) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final gastoLike = await gastosRepository.enviarImagen(imagen);
+      state = state.copyWith(isLoading: false);
+      return gastoLike;
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      print(e);
+      return null; // Devuelve null si hay una excepción
     }
   }
 

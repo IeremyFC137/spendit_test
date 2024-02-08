@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendit_test/config/router/app_router_notifier.dart';
 import 'package:spendit_test/features/auth/presentation/screens/screens.dart';
+import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/presentation/screen/screens.dart';
 import '../../features/auth/presentation/providers/providers.dart';
 
@@ -49,10 +50,10 @@ final goRouterProvider = Provider((ref) {
           path: '/gastos/ingreso-manual',
           name: IngresoManualScreen.name,
           pageBuilder: (context, state) {
-            final formData = state.extra as Map<String, dynamic>?;
+            final gastoLike = state.extra as GastoLike?;
             return _fadeTransitionPage(
               key: state.pageKey,
-              child: IngresoManualScreen(formData: formData),
+              child: IngresoManualScreen(gastoLike: gastoLike),
             );
           }),
       GoRoute(
