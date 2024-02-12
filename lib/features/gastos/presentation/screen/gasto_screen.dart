@@ -9,7 +9,6 @@ import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
 import 'package:spendit_test/features/shared/shared.dart';
-import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 
 import '../widgets/widgets.dart';
 
@@ -51,7 +50,7 @@ class GastoScreen extends ConsumerWidget {
                 estado: '',
                 images: []));
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
         appBar: AppBarWidget(

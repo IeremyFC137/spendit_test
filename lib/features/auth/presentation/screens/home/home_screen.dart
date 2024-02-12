@@ -32,7 +32,7 @@ List featuresImg = [
 ];
 
 List<String> featuresDescription = [
-  "Automatiza la\nsolicitud de fondos",
+  "Automatiza las\nsolicitudes de fondos",
   "Registra gastos",
   "Asocia gastos en\nuna rendición",
   "Revisa las rendiciones\n enviadas"

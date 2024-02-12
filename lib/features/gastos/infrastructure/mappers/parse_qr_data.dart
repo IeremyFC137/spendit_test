@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
 
-GastoLike parseQRData(String qrData) {
+GastoLike? parseQRData(String qrData) {
   // Dividir el string por el delimitador '|'
   List<String> parts = qrData.split('|');
 
@@ -30,6 +30,6 @@ GastoLike parseQRData(String qrData) {
         fechaEmision: fechaEmision);
   } else {
     // Manejar error o string inesperado
-    throw FormatException('El formato del QR no es válido.');
+    return null;
   }
 }

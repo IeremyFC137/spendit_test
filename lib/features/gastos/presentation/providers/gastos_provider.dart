@@ -139,6 +139,8 @@ class GastosNotifier extends StateNotifier<GastosState> {
   Future<void> eliminarGasto(int gastoId) async {
     try {
       await gastosRepository.eliminarGasto(gastoId);
+      state = state.copyWith(
+          gastos: state.gastos.where((gasto) => gasto.id != gastoId).toList());
     } catch (e) {
       print(e);
       throw Exception(e);

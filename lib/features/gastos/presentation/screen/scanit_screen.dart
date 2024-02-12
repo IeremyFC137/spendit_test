@@ -82,7 +82,6 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
           GoRouter.of(context)
               .pushReplacement('/gastos/ingreso-manual', extra: gastoLike);
         } else {
-          print("Error aquí");
           showError();
         }
       } else {
@@ -111,16 +110,17 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
       appBar: const AppBarWidget(title: "Scanit"),
       body: _isProcessing
           ? _capturedImage != null
-              ? Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.file(_capturedImage!), // Muestra la imagen capturada
-                    Center(
-                        child:
-                            CircularProgressIndicator()) // Indicador de carga sobre la imagen
-                  ],
+              ? Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Image.file(
+                          _capturedImage!), // Muestra la imagen capturada
+                      FullScreenLoader() // Indicador de carga sobre la imagen
+                    ],
+                  ),
                 )
-              : Center(child: CircularProgressIndicator())
+              : FullScreenLoader()
           : Container(), // No muestra nada mientras no se esté procesando
     );
   }

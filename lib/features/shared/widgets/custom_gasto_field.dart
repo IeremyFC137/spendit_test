@@ -80,8 +80,12 @@ class CustomGastoField extends ConsumerWidget {
           floatingLabelBehavior: maxLines > 2
               ? FloatingLabelBehavior.always
               : FloatingLabelBehavior.auto,
-          floatingLabelStyle: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          floatingLabelStyle: TextStyle(
+              color: !ref.read(themeNotifierProvider).isDarkmode
+                  ? Colors.black
+                  : colors.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
           labelStyle: TextStyle(
             color: !ref.read(themeNotifierProvider).isDarkmode
                 ? Colors.black

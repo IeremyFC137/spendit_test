@@ -63,8 +63,7 @@ class _ThemeChangerView extends ConsumerWidget {
                 activeColor: color,
                 value: index,
                 groupValue: selectedColor,
-                onChanged: (value) {
-                  // ref.read(selectedColorProvider.notifier).state = index;
+                onChanged: (value) async {
                   ref
                       .watch(themeNotifierProvider.notifier)
                       .changeColorIndex(index);

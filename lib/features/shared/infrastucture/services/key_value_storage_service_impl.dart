@@ -14,6 +14,8 @@ class KeyValueStorageServiceImpl extends KeyValueStorageService {
         return prefs.getInt(key) as T?;
       case String:
         return prefs.getString(key) as T?;
+      case bool:
+        return prefs.getBool(key) as T?;
       default:
         throw UnimplementedError(
             'Get not implemented for type ${T.runtimeType}');
@@ -35,6 +37,9 @@ class KeyValueStorageServiceImpl extends KeyValueStorageService {
         break;
       case String:
         prefs.setString(key, value as String);
+        break;
+      case bool:
+        prefs.setBool(key, value as bool);
         break;
       default:
         throw UnimplementedError(

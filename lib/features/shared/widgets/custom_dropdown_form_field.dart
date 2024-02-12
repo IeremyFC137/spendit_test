@@ -63,13 +63,17 @@ class CustomDropdownFormField<T> extends ConsumerWidget {
         style: const TextStyle(fontSize: 20, color: Colors.black54),
         dropdownColor: !ref.read(themeNotifierProvider).isDarkmode
             ? Colors.white
-            : colors.onPrimary,
+            : colors.primary,
         decoration: InputDecoration(
           floatingLabelBehavior: maxLines > 2
               ? FloatingLabelBehavior.always
               : FloatingLabelBehavior.auto,
-          floatingLabelStyle: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          floatingLabelStyle: TextStyle(
+              color: !ref.read(themeNotifierProvider).isDarkmode
+                  ? Colors.black
+                  : colors.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
           enabledBorder: border,
           focusedBorder: border,
           errorBorder: border.copyWith(

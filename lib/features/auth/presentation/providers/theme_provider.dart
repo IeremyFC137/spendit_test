@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendit_test/config/theme/app_theme.dart';
 
+import '../../../shared/shared.dart';
+
 final colorListProvider = Provider((ref) => colorList);
 
 final nameListProvider = Provider((ref) => nameList);
@@ -10,18 +12,22 @@ final isDarkModeProvider = StateProvider((ref) => false);
 final selectedColorProvider = StateProvider((ref) => 0);
 
 final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, AppTheme>(
-  (ref) => ThemeNotifier(),
+  (ref) => ThemeNotifier(AppTheme()),
 );
 
 class ThemeNotifier extends StateNotifier<AppTheme> {
-  // STATE = Estado = new AppTheme();
-  ThemeNotifier() : super(AppTheme());
+  final keyValueStorageService = KeyValueStorageServiceImpl();
 
-  void toggleDarkmode() {
-    state = state.copyWith(isDarkmode: !state.isDarkmode);
+  ThemeNotifier(AppTheme initialTheme) : super(initialTheme);
+
+  void toggleDarkmode() async {
+    final newIsDarkmode = !state.isDarkmode;
+    await keyValueStorageService.setKeyValue('isDarkMode', newIsDarkmode);
+    state = state.copyWith(isDarkmode: newIsDarkmode);
   }
 
-  void changeColorIndex(int colorIndex) {
+  void changeColorIndex(int colorIndex) async {
+    await keyValueStorageService.setKeyValue('colorTheme', colorIndex);
     state = state.copyWith(selectedColor: colorIndex);
   }
 }

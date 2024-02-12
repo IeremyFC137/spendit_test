@@ -117,15 +117,13 @@ class GastosDatasourceImpl extends GastosDatasource {
 
   @override
   Future<GastoLike> enviarImagen(File imagen) async {
-    print("datasource");
-    print(imagen.path);
     FormData formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(imagen.path, filename: "upload.jpg"),
     });
 
     final response = await dio.post("/scanit", data: formData);
-
     if (response.statusCode == 200) {
+      // Asume que tienes una función que convierte json a GastoLike
       GastoLike gastoLike =
           GastoLikeMapper.scanitJsonToGastoLikeEntity(response.data);
       return gastoLike;
@@ -136,6 +134,7 @@ class GastosDatasourceImpl extends GastosDatasource {
 
   @override
   Future<void> validarGastoConSunat() {
+    // TODO: implement validarGastoConSunat
     throw UnimplementedError();
   }
 }

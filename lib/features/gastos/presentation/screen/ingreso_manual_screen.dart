@@ -112,7 +112,7 @@ class _GastoForm extends ConsumerWidget {
               label: 'Proveedor',
               isTopField: true,
               initialValue: gastoLike?.proveedor ?? "",
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
               onChanged: ref
                   .read(gastoFormProvider(gastoLike).notifier)
                   .onProveedorChange,
@@ -125,7 +125,7 @@ class _GastoForm extends ConsumerWidget {
               maxLines: 2,
               label: 'Ruc',
               initialValue: gastoLike?.ruc ?? '',
-              keyboardType: TextInputType.text,
+              keyboardType: TextInputType.number,
               isTopField: false,
               onChanged:
                   ref.read(gastoFormProvider(gastoLike).notifier).onRucChange,

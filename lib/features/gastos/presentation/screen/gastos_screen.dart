@@ -4,11 +4,10 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
-import 'package:spendit_test/features/gastos/presentation/widgets/gasto_card.dart';
-import 'package:spendit_test/features/shared/widgets/app_bar_widget.dart';
 import 'package:spendit_test/features/shared/shared.dart';
 
 import '../../../auth/presentation/providers/providers.dart';
+import '../widgets/widgets.dart';
 //import '../../infrastructure/mappers/mappers.dart';
 
 class GastosScreen extends ConsumerStatefulWidget {
@@ -50,7 +49,17 @@ class _GastosScreenState extends ConsumerState {
       backgroundColor: colors.inversePrimary.withAlpha(205).withOpacity(1),
       appBar: AppBarWidget(
           title: "Gastos",
-          icon: IconButton(onPressed: () => {}, icon: Icon(Icons.search))),
+          icon: IconButton(
+            onPressed: () {
+              // Aquí llamas a showSearch
+              showSearch(
+                context: context,
+                delegate: GastosSearchDelegate(
+                    theme: ref.watch(themeNotifierProvider).getTheme()),
+              );
+            },
+            icon: Icon(Icons.search),
+          )),
       body: gastosState.isLoading && gastosState.gastos.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -100,9 +109,6 @@ class _GastosScreenState extends ConsumerState {
                     await ref
                         .read(gastosProvider.notifier)
                         .eliminarGasto(gasto.id);
-                    setState(() {
-                      gastosState.gastos.removeAt(index);
-                    });
                     // Mostrar un snackbar o mensaje de confirmación si lo deseas
                   },
                   child: Padding(

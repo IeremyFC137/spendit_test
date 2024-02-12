@@ -53,7 +53,7 @@ class _QRScannerScreenState extends State<QRScannerScreen>
     controller.scannedDataStream.listen((scanData) {
       // Pausa la cámara antes de navegar
       controller.pauseCamera();
-      final GastoLike gastoLike = parseQRData(scanData.code ?? '');
+      final GastoLike? gastoLike = parseQRData(scanData.code ?? '');
       // Navega a la pantalla de ingreso manual con los datos del formulario
       GoRouter.of(context)
           .pushReplacement('/gastos/ingreso-manual', extra: gastoLike);

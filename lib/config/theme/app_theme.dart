@@ -24,11 +24,15 @@ var nameList = <String>[
 class AppTheme {
   final int selectedColor;
   final bool isDarkmode;
+  final Color? scaffoldBackgroundColor;
+  final InputDecorationTheme? inputDecorationTheme;
 
-  AppTheme({
-    this.selectedColor = 0,
-    this.isDarkmode = false,
-  })  : assert(selectedColor >= 0, 'Selected color must be greater then 0'),
+  AppTheme(
+      {this.selectedColor = 0,
+      this.scaffoldBackgroundColor,
+      this.inputDecorationTheme,
+      this.isDarkmode = false})
+      : assert(selectedColor >= 0, 'Selected color must be greater then 0'),
         assert(selectedColor < colorList.length,
             'Selected color must be less or equal than ${colorList.length - 1}');
 
@@ -56,15 +60,16 @@ class AppTheme {
 
       ///* Texts
       textTheme: TextTheme(
-          titleLarge: GoogleFonts.montserratAlternates()
-              .copyWith(fontSize: 40, fontWeight: FontWeight.bold),
-          titleMedium: GoogleFonts.montserratAlternates()
-              .copyWith(fontSize: 30, fontWeight: FontWeight.bold),
-          titleSmall:
-              GoogleFonts.montserratAlternates().copyWith(fontSize: 20)),
+        titleLarge: GoogleFonts.montserratAlternates()
+            .copyWith(fontSize: 40, fontWeight: FontWeight.bold),
+        titleMedium: GoogleFonts.montserratAlternates()
+            .copyWith(fontSize: 30, fontWeight: FontWeight.bold),
+        titleSmall: GoogleFonts.montserratAlternates().copyWith(fontSize: 20),
+      ),
 
       ///* Scaffold Background Color
-      scaffoldBackgroundColor: colorList[selectedColor],
+      scaffoldBackgroundColor:
+          scaffoldBackgroundColor ?? colorList[selectedColor],
 
       ///* Buttons
       filledButtonTheme: FilledButtonThemeData(
@@ -72,6 +77,7 @@ class AppTheme {
               textStyle: MaterialStatePropertyAll(
                   GoogleFonts.montserratAlternates()
                       .copyWith(fontWeight: FontWeight.w700)))),
+      inputDecorationTheme: inputDecorationTheme,
 
       ///* AppBar
       appBarTheme: AppBarTheme(
@@ -81,8 +87,16 @@ class AppTheme {
         iconTheme: const IconThemeData(color: Colors.white),
       ));
 
-  AppTheme copyWith({int? selectedColor, bool? isDarkmode}) => AppTheme(
-        selectedColor: selectedColor ?? this.selectedColor,
-        isDarkmode: isDarkmode ?? this.isDarkmode,
-      );
+  AppTheme copyWith(
+          {int? selectedColor,
+          bool? isDarkmode,
+          Color? scaffoldBackgroundColor,
+          InputDecorationTheme? inputDecorationTheme}) =>
+      AppTheme(
+          selectedColor: selectedColor ?? this.selectedColor,
+          isDarkmode: isDarkmode ?? this.isDarkmode,
+          scaffoldBackgroundColor:
+              scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+          inputDecorationTheme:
+              inputDecorationTheme ?? this.inputDecorationTheme);
 }

@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import '../../gastos/domain/domain.dart';
 import '../infrastucture/inputs/inputs.dart';
 
-TipoDocumento? parseTipoDocumento(String? tipo) {
-  switch (tipo?.toUpperCase()) {
+TipoDocumento? parseTipoDocumento(String tipo) {
+  switch (tipo.toUpperCase()) {
     case 'FACTURA':
       return TipoDocumento.FACTURA;
     case 'BOLETA':
@@ -15,8 +15,8 @@ TipoDocumento? parseTipoDocumento(String? tipo) {
   }
 }
 
-Moneda? parseMoneda(String? moneda) {
-  switch (moneda?.toUpperCase()) {
+Moneda? parseMoneda(String moneda) {
+  switch (moneda.toUpperCase()) {
     case 'SOLES':
       return Moneda.SOLES;
     case 'DOLARES':
@@ -71,7 +71,7 @@ List<DropdownMenuItem<Moneda>> getMonedaItems() {
 }
 
 TipoDocumento? parseStringToDocumentType(String input) {
-  TipoDocumento tipo;
+  TipoDocumento? tipo;
 
   switch (input) {
     case "BOLETA":
