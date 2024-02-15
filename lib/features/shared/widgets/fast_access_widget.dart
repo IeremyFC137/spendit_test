@@ -19,6 +19,7 @@ class FastAccessWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final colors = Theme.of(context).colorScheme;
+    final currentRoute = GoRouter.of(context).location;
 
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
@@ -46,23 +47,23 @@ class FastAccessWidget extends ConsumerWidget {
       unselectedItemColor: Colors.white,
       selectedItemColor: Colors.amber[800],
       onTap: (index) {
-        switch (index) {
-          case 0:
-            context.pushReplacement('/gastos');
-            break;
-          case 1:
-            context.pushReplacement('/rendicion');
-            break;
-          case 2:
-            context.pushReplacement('/revision');
-            break;
-          case 3:
-            context.pushReplacement('/fondos');
-            break;
+        final routeToNavigate = routeMap[index];
+        if (routeToNavigate != null && currentRoute != routeToNavigate) {
+          context.pushReplacement(routeToNavigate);
         }
       },
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
     );
+  }
+}
+
+extension GoRouterLocation on GoRouter {
+  String get location {
+    final RouteMatch lastMatch = routerDelegate.currentConfiguration.last;
+    final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
+        ? lastMatch.matches
+        : routerDelegate.currentConfiguration;
+    return matchList.uri.toString();
   }
 }

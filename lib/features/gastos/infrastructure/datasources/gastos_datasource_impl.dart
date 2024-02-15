@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'package:spendit_test/config/config.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
@@ -133,8 +134,20 @@ class GastosDatasourceImpl extends GastosDatasource {
   }
 
   @override
-  Future<void> validarGastoConSunat() {
-    // TODO: implement validarGastoConSunat
-    throw UnimplementedError();
+  Future<ConsultaSunat> validarGastoConSunat(GastoLike gasto) async {
+    final response = await dio.post("/sunat/validarComprobante", data: {
+      "numRuc": gasto.ruc,
+      "codComp": gasto.tipoDocumento == TipoDocumento.FACTURA ? "01" : "03",
+      "numeroSerie": gasto.documento!.substring(0, 4),
+      "numero": gasto.documento!.substring(5),
+      "fechaEmision": DateFormat('dd/MM/yyyy').format(gasto.fechaEmision!),
+      "monto": (gasto.igv! + gasto.subTotal!)
+    });
+    if (response.statusCode == 200) {
+      ConsultaSunat data = ConsultaSunatMapper.JsonToEntity(response.data);
+      return data;
+    } else {
+      throw Exception('Error al procesar los datos del comprobante');
+    }
   }
 }

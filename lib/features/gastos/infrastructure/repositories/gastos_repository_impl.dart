@@ -75,13 +75,11 @@ class GastosRepositoryImpl extends GastosRepository {
 
   @override
   Future<GastoLike> enviarImagen(File imagen) {
-    // TODO: implement enviarImagen
     return datasource.enviarImagen(imagen);
   }
 
   @override
-  Future<void> validarGastoConSunat() {
-    // TODO: implement validarGastoConSunat
-    throw UnimplementedError();
+  Future<ConsultaSunat> validarGastoConSunat(GastoLike gasto) {
+    return datasource.validarGastoConSunat(gasto);
   }
 }

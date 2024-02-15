@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
@@ -62,7 +63,9 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
   Future<void> takePhotoAndSend(BuildContext context, WidgetRef ref) async {
     setState(() {
       _isProcessing = true; // Iniciar procesamiento
+      _capturedImage = null; // Asegúrate de resetear la imagen capturada aquí
     });
+
     final photoPath = await CameraGalleryServiceImpl().takePhoto();
     if (photoPath != null) {
       final file = File(photoPath);
@@ -78,11 +81,19 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
         setState(() {
           _isProcessing = false; // Procesamiento terminado
         });
-        if (gastoLike != null) {
+        if (gastoLike?.proveedor != '' ||
+            gastoLike?.ruc != '' ||
+            gastoLike?.tipoDocumento != null ||
+            gastoLike?.documento != '' ||
+            gastoLike?.fechaEmision != null ||
+            gastoLike?.moneda != null ||
+            gastoLike?.subTotal != 0 ||
+            gastoLike?.igv != 0) {
           GoRouter.of(context)
               .pushReplacement('/gastos/ingreso-manual', extra: gastoLike);
         } else {
-          showError();
+          showError(
+              "El documento escaneado no se ha reconocido como un comprobante de pago.");
         }
       } else {
         showError();
@@ -94,10 +105,11 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
     }
   }
 
-  void showError() {
+  void showError([String? message]) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Error al enviar la imagen. Intente de nuevo."),
+      content: Text(message ?? "Error al enviar la imagen. Intente de nuevo."),
       backgroundColor: Colors.red,
+      duration: Duration(seconds: 6),
     ));
   }
 
@@ -121,7 +133,18 @@ class _ScanitScreenState extends ConsumerState<ScanitScreen> {
                   ),
                 )
               : FullScreenLoader()
-          : Container(), // No muestra nada mientras no se esté procesando
+          : Center(
+              child: ElevatedButton.icon(
+                icon: FaIcon(FontAwesomeIcons.robot),
+                onPressed: () {
+                  takePhotoAndSend(context, ref);
+                },
+                label: Text("Escanear"),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+              ),
+            ), // No muestra nada mientras no se esté procesando
     );
   }
 }

@@ -23,11 +23,11 @@ class GastoLikeMapper {
   static scanitJsonToGastoLikeEntity(Map<String, dynamic> json) => GastoLike(
         proveedor: json["proveedor"],
         ruc: json["ruc"],
-        tipoDocumento: parseTipoDocumento(json["tipo_documento"] as String)!,
+        tipoDocumento: parseTipoDocumento(json["tipo_documento"] as String),
         documento: json["documento"],
         fechaEmision: parseFechaEmision(json["fecha_emision"]),
         moneda: parseMoneda(json["moneda"] as String),
-        subTotal: json["sub_total"],
-        igv: json["igv"],
+        subTotal: double.parse(json["sub_total"].toString()),
+        igv: double.parse(json["igv"].toString()),
       );
 }

@@ -9,7 +9,6 @@ import 'package:spendit_test/features/gastos/domain/domain.dart';
 import 'package:spendit_test/features/gastos/infrastructure/infrastructure.dart';
 import 'package:spendit_test/features/gastos/presentation/providers/providers.dart';
 import 'package:spendit_test/features/shared/shared.dart';
-
 import '../widgets/widgets.dart';
 
 class GastoScreen extends ConsumerWidget {
@@ -23,7 +22,7 @@ class GastoScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         duration: Duration(seconds: 4),
-        content: Text('Gasto Actualizado')));
+        content: Text('Gasto actualizado')));
   }
 
   Widget build(BuildContext context, WidgetRef ref) {
@@ -304,6 +303,53 @@ class _GastoInformation extends ConsumerWidget {
             errorMessage: gastoForm.isFormPosted
                 ? gastoForm.cuentaContable.errorMessage
                 : null,
+          ),
+          const SizedBox(height: 50),
+          Center(
+            child: CustomFilledButton(
+              onPressed: () async {
+                final responseSunat = await ref
+                    .read(gastosProvider.notifier)
+                    .validarGastoConSunat(gastoLike);
+
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Resultado de Validación con SUNAT'),
+                      content: SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            Text('RUC: ${gastoLike.ruc}'),
+                            Text(
+                                'Resultado: ${obtenerResultado(responseSunat?.estadoCp ?? 'NOT FOUND')}'),
+                            Text(
+                                'Estado: ${obtenerEstado(responseSunat?.estadoRuc ?? 'NOT FOUND')}'),
+                            Text(
+                                'Condicion: ${obtenerCondicion(responseSunat?.condDomiRuc ?? 'NOT FOUND')}'),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Cerrar'),
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Cierra el AlertDialog
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              text: "Validar con SUNAT",
+              buttonColor: colors.primary, // Ajusta según tu esquema de color
+              isLoading: ref
+                  .watch(gastosProvider)
+                  .isLoading, // Controla este estado según necesites
+              icon: FaIcon(FontAwesomeIcons.squareCheck), // Ícono FontAwesome
+            ),
           ),
           const SizedBox(height: 100),
         ],

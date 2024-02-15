@@ -45,7 +45,6 @@ class GastosNotifier extends StateNotifier<GastosState> {
   Future<bool> editarGasto(int gastoId, String? cCosto, String? cGasto,
       String? cContable, double importe, double pImporte) async {
     try {
-      state = state.copyWith(isLoading: true);
       var aux =
           state.gastos.where((element) => element.id == gastoId).toList()[0];
       if (aux.cCosto == cCosto) {
@@ -75,8 +74,7 @@ class GastosNotifier extends StateNotifier<GastosState> {
               .map(
                 (element) => (element.id == gasto.id) ? gasto : element,
               )
-              .toList(),
-          isLoading: false);
+              .toList());
       return true;
     } catch (e) {
       return false;
@@ -133,6 +131,19 @@ class GastosNotifier extends StateNotifier<GastosState> {
       state = state.copyWith(isLoading: false);
       print(e);
       return null; // Devuelve null si hay una excepción
+    }
+  }
+
+  Future<ConsultaSunat?> validarGastoConSunat(GastoLike gasto) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final sunatResponse = await gastosRepository.validarGastoConSunat(gasto);
+      state = state.copyWith(isLoading: false);
+      return sunatResponse;
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      print(e);
+      throw Exception(e);
     }
   }
 

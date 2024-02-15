@@ -86,13 +86,13 @@ class _GastosScreenState extends ConsumerState {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text("Confirmar"),
+                          title: const Text("Atención"),
                           content: const Text(
                               "¿Estás seguro de que quieres eliminar este gasto?"),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text("Eliminar"),
+                              child: const Text("Confirmar"),
                             ),
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),

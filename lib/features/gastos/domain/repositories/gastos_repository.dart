@@ -35,5 +35,5 @@ abstract class GastosRepository {
 
   Future<GastoLike> enviarImagen(File imagen);
 
-  Future<void> validarGastoConSunat();
+  Future<ConsultaSunat> validarGastoConSunat(GastoLike gasto);
 }

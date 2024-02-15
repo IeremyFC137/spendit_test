@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:spendit_test/config/router/app_router_notifier.dart';
 import 'package:spendit_test/features/auth/presentation/screens/screens.dart';
 import 'package:spendit_test/features/gastos/domain/domain.dart';
-import 'package:spendit_test/features/gastos/presentation/screen/screens.dart';
+import 'package:spendit_test/features/gastos/presentation/screens/screens.dart';
 import '../../features/auth/presentation/providers/providers.dart';
 
 final goRouterProvider = Provider((ref) {

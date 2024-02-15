@@ -367,33 +367,32 @@ class _GastoForm extends ConsumerWidget {
                 child: CustomFilledButton(
                   text: 'Guardar',
                   buttonColor: colors.primary,
-                  onPressed: gastoForm.isPosting
-                      ? null
-                      : () async {
-                          final isSuccess = await ref
-                              .read(gastoFormProvider(gastoLike).notifier)
-                              .onFormSubmit();
-                          if (isSuccess) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Gasto registrado correctamente"),
-                                backgroundColor: Colors.green,
-                                duration: Duration(seconds: 4),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            context.pop(); // Regresa a la pantalla anterior.
-                          } else if (gastoForm.isValid) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Error al registrar el gasto"),
-                                duration: Duration(seconds: 4),
-                                backgroundColor: Colors.red,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        },
+                  isLoading: gastoForm.isPosting,
+                  onPressed: () async {
+                    final isSuccess = await ref
+                        .read(gastoFormProvider(gastoLike).notifier)
+                        .onFormSubmit();
+                    if (isSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Gasto registrado correctamente"),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 4),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      context.pop(); // Regresa a la pantalla anterior.
+                    } else if (gastoForm.isValid) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error al registrar el gasto"),
+                          duration: Duration(seconds: 4),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
             ),
