@@ -6,7 +6,6 @@ import 'package:spendit_test/features/gastos/domain/domain.dart';
 
 import 'package:spendit_test/features/gastos/presentation/providers/gastos_provider.dart';
 import '../../../auth/domain/domain.dart';
-import '../../../shared/infrastucture/inputs/inputs.dart';
 import '../../../shared/shared.dart';
 
 final gastoFormProvider = StateNotifierProvider.autoDispose
@@ -16,10 +15,12 @@ final gastoFormProvider = StateNotifierProvider.autoDispose
   final gastoActualizarCallback =
       ref.watch(gastosProvider.notifier).editarGasto;
   final user = ref.watch(authProvider).user;
+  final listCampoDetalle = ref.read(gastosProvider).campoDetalle;
   return GastoFormNotifier(
       gastoRegistrarCallback: gastoRegistrarCallback,
       gastoActualizarCallback: gastoActualizarCallback,
       user: user,
+      listCampoDetalle: listCampoDetalle,
       gastoLike: gastoLike);
 });
 
@@ -27,9 +28,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   final Function gastoRegistrarCallback;
   final Function gastoActualizarCallback;
   final User? user;
+  final List listCampoDetalle;
   GastoFormNotifier(
       {required this.gastoRegistrarCallback,
       required this.user,
+      required this.listCampoDetalle,
       GastoLike? gastoLike,
       required this.gastoActualizarCallback})
       : super(GastoFormState(
@@ -337,7 +340,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
 
   Future<bool> onFormActualizarSubmit() async {
     _touchEveryField();
-    if (!state.isValid) return false;
+
+    bool esCentroCostoValido =
+        listCampoDetalle.contains(state.centroCosto.value);
+
+    if (!state.isValid || !esCentroCostoValido) return false;
     state = state.copyWith(isPosting: true);
 
     try {
@@ -360,7 +367,10 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   Future<bool> onFormSubmit() async {
     _touchEveryField();
 
-    if (!state.isValid) return false;
+    bool esCentroCostoValido =
+        listCampoDetalle.contains(state.centroCosto.value);
+
+    if (!state.isValid || !esCentroCostoValido) return false;
     state = state.copyWith(isPosting: true);
 
     DateTime? fechaEmisionParsed = parseFechaEmision(state.fechaEmision.value);

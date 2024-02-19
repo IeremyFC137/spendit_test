@@ -22,8 +22,12 @@ class GastoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(gasto.cCosto,
-              style: TextStyle(color: Colors.black.withOpacity(0.6))),
+          Text(
+            gasto.cCosto.length > 37
+                ? '${gasto.cCosto.substring(0, 37)}...'
+                : gasto.cCosto,
+            style: TextStyle(color: Colors.black.withOpacity(0.6)),
+          ),
           Text(DateFormat('yyyy-MM-dd').format(gasto.fechaEmision).toString(),
               style: TextStyle(color: Colors.black.withOpacity(0.6)))
         ],

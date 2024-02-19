@@ -157,6 +157,21 @@ class GastosNotifier extends StateNotifier<GastosState> {
       throw Exception(e);
     }
   }
+
+  Future<void> obtenerCampoDetalle() async {
+    if (state.hasCgastoBeenObtained == true) {
+      return;
+    }
+    try {
+      final listaCentroCosto = await gastosRepository.obtenerCampoDetalle();
+      state = state.copyWith(
+          hasCgastoBeenObtained: true, campoDetalle: [...listaCentroCosto]);
+    } catch (e) {
+      state = state.copyWith(hasCgastoBeenObtained: false);
+      print(e);
+      throw Exception(e);
+    }
+  }
 }
 
 class GastosState {
@@ -164,6 +179,8 @@ class GastosState {
   final int size;
   final int page;
   final bool isLoading;
+  final bool hasCgastoBeenObtained;
+  final List<String> campoDetalle;
   final List<Gasto> gastos;
 
   GastosState(
@@ -171,19 +188,25 @@ class GastosState {
       this.size = 7,
       this.page = 0,
       this.isLoading = false,
-      this.gastos = const []});
+      this.hasCgastoBeenObtained = false,
+      this.gastos = const [],
+      this.campoDetalle = const []});
 
-  GastosState copyWith({
-    bool? isLastPage,
-    int? size,
-    int? page,
-    bool? isLoading,
-    List<Gasto>? gastos,
-  }) =>
+  GastosState copyWith(
+          {bool? isLastPage,
+          int? size,
+          int? page,
+          bool? isLoading,
+          bool? hasCgastoBeenObtained,
+          List<Gasto>? gastos,
+          List<String>? campoDetalle}) =>
       GastosState(
           isLastPage: isLastPage ?? this.isLastPage,
           size: size ?? this.size,
           page: page ?? this.page,
           isLoading: isLoading ?? this.isLoading,
-          gastos: gastos ?? this.gastos);
+          gastos: gastos ?? this.gastos,
+          campoDetalle: campoDetalle ?? this.campoDetalle,
+          hasCgastoBeenObtained:
+              hasCgastoBeenObtained ?? this.hasCgastoBeenObtained);
 }

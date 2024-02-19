@@ -20,6 +20,7 @@ class IngresoManualScreen extends StatefulWidget {
 
 class _IngresoManualScreenState extends State<IngresoManualScreen> {
   late TextEditingController fechaEmisionController;
+
   @override
   void initState() {
     super.initState();
@@ -59,8 +60,9 @@ class _IngresoManualScreenState extends State<IngresoManualScreen> {
                         const BorderRadius.only(topLeft: Radius.circular(100)),
                   ),
                   child: _GastoForm(
-                      gastoLike: widget.gastoLike,
-                      fechaEmisionController: fechaEmisionController),
+                    gastoLike: widget.gastoLike,
+                    fechaEmisionController: fechaEmisionController,
+                  ),
                 ),
               ],
             )),
@@ -72,6 +74,7 @@ class _IngresoManualScreenState extends State<IngresoManualScreen> {
 class _GastoForm extends ConsumerWidget {
   final GastoLike? gastoLike;
   final TextEditingController fechaEmisionController;
+
   const _GastoForm({
     this.gastoLike,
     required this.fechaEmisionController,
@@ -80,6 +83,7 @@ class _GastoForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final gastoForm = ref.watch(gastoFormProvider(gastoLike));
+    final listCcosto = ref.watch(gastosProvider).campoDetalle;
     print(gastoForm);
     print(gastoLike);
     final colors = Theme.of(context).colorScheme;
@@ -265,7 +269,26 @@ class _GastoForm extends ConsumerWidget {
             SizedBox(
               height: 20,
             ),
-            CustomGastoField(
+            ElementoAutocompleteWidget(
+                label: 'Centro de costo',
+                maxLines: 2,
+                isTopField: true,
+                keyboardType: TextInputType.text,
+                elementos: listCcosto,
+                errorMessage: gastoForm.isFormPosted
+                    ? gastoForm.centroCosto.errorMessage
+                    : null,
+                validator: (value) {
+                  if (!listCcosto.contains(value)) {
+                    return 'Selecciona un valor válido de la lista.';
+                  }
+                  return null;
+                },
+                onChanged: ref
+                    .read(gastoFormProvider(gastoLike).notifier)
+                    .onCentroCostoChange),
+            DividerForm(),
+            /*CustomGastoField(
               maxLines: 2,
               label: 'Centro de costo',
               isTopField: true,
@@ -277,7 +300,7 @@ class _GastoForm extends ConsumerWidget {
                   ? gastoForm.centroCosto.errorMessage
                   : null,
             ),
-            DividerForm(),
+            DividerForm(),*/
             CustomGastoField(
               maxLines: 2,
               label: 'Concepto de gasto',
@@ -344,15 +367,6 @@ class _GastoForm extends ConsumerWidget {
                       .onPimporteChange(parsedValue / 100);
                 }
               },
-              validator: (value) {
-                if (value == null || value.isEmpty)
-                  return 'Este campo es obligatorio';
-                final numberValue = double.tryParse(value);
-                if (numberValue == null) return 'Debe ser un número';
-                if (numberValue < 0 || numberValue > 100)
-                  return 'Debe estar entre 0 y 100';
-                return null;
-              },
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.pimporte.errorMessage
                   : null,
@@ -372,6 +386,9 @@ class _GastoForm extends ConsumerWidget {
                     final isSuccess = await ref
                         .read(gastoFormProvider(gastoLike).notifier)
                         .onFormSubmit();
+
+                    print(isSuccess);
+
                     if (isSuccess) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

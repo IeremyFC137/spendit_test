@@ -150,4 +150,15 @@ class GastosDatasourceImpl extends GastosDatasource {
       throw Exception('Error al procesar los datos del comprobante');
     }
   }
+
+  @override
+  Future<List> obtenerCampoDetalle() async {
+    final response = await dio.get("/gastos/obtenerCentroCosto");
+    if (response.statusCode == 200) {
+      List listaCcosto = response.data["datos"];
+      return listaCcosto;
+    } else {
+      throw Exception('Error al obtener la lista de centro de costos');
+    }
+  }
 }

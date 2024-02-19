@@ -82,4 +82,9 @@ class GastosRepositoryImpl extends GastosRepository {
   Future<ConsultaSunat> validarGastoConSunat(GastoLike gasto) {
     return datasource.validarGastoConSunat(gasto);
   }
+
+  @override
+  Future<List> obtenerCampoDetalle() {
+    return datasource.obtenerCampoDetalle();
+  }
 }

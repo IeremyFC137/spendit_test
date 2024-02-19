@@ -25,6 +25,9 @@ class _GastosScreenState extends ConsumerState {
   @override
   void initState() {
     super.initState();
+    if (ref.read(gastosProvider).gastos.isEmpty) {
+      ref.read(gastosProvider.notifier).obtenerCampoDetalle();
+    }
     scrollController.addListener(() {
       if ((scrollController.position.pixels + 400) >=
           scrollController.position.maxScrollExtent) {
@@ -104,12 +107,9 @@ class _GastosScreenState extends ConsumerState {
                     );
                   },
                   onDismissed: (direction) async {
-                    // Aquí puedes manejar la lógica de eliminación de tu tarjeta
-                    // Por ejemplo, eliminar la tarjeta de tu estado o base de datos
                     await ref
                         .read(gastosProvider.notifier)
                         .eliminarGasto(gasto.id);
-                    // Mostrar un snackbar o mensaje de confirmación si lo deseas
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),

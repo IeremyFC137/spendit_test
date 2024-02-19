@@ -6,6 +6,7 @@ import '../../auth/presentation/providers/providers.dart';
 class CustomGastoField extends ConsumerWidget {
   final bool isTopField; // La idea es que tenga bordes redondeados arriba
   final bool isBottomField; // La idea es que tenga bordes redondeados abajo
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final String? errorMessage;
@@ -25,6 +26,7 @@ class CustomGastoField extends ConsumerWidget {
       this.isBottomField = false,
       this.label,
       this.hint,
+      this.focusNode,
       this.errorMessage,
       this.obscureText = false,
       this.keyboardType = TextInputType.text,
@@ -66,6 +68,8 @@ class CustomGastoField extends ConsumerWidget {
                   offset: const Offset(0, 3))
           ]),
       child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        focusNode: focusNode,
         enabled: enabled,
         controller: controller,
         onChanged: onChanged,

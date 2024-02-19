@@ -133,6 +133,7 @@ class _GastoInformation extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gastoForm = ref.watch(gastoFormProvider(gastoLike));
+    final listCcosto = ref.watch(gastosProvider).campoDetalle;
     print(gastoForm);
     print(gastoLike);
     return Padding(
@@ -268,7 +269,7 @@ class _GastoInformation extends ConsumerWidget {
                 gastoForm.isFormPosted ? gastoForm.pimporte.errorMessage : null,
           ),
           DividerForm(),
-          CustomGastoField(
+          /*CustomGastoField(
             isTopField: false,
             label: 'Centro de costo',
             initialValue: gastoLike.cCosto!,
@@ -278,7 +279,25 @@ class _GastoInformation extends ConsumerWidget {
             errorMessage: gastoForm.isFormPosted
                 ? gastoForm.centroCosto.errorMessage
                 : null,
-          ),
+          ),*/
+          ElementoAutocompleteWidget(
+              label: 'Centro de costo',
+              maxLines: 2,
+              isTopField: false,
+              keyboardType: TextInputType.text,
+              elementos: listCcosto,
+              errorMessage: gastoForm.isFormPosted
+                  ? gastoForm.centroCosto.errorMessage
+                  : null,
+              validator: (value) {
+                if (!listCcosto.contains(value)) {
+                  return 'Selecciona un valor válido de la lista.';
+                }
+                return null;
+              },
+              onChanged: ref
+                  .read(gastoFormProvider(gastoLike).notifier)
+                  .onCentroCostoChange),
           DividerForm(),
           CustomGastoField(
             isTopField: false,

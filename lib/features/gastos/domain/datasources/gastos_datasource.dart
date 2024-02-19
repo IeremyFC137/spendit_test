@@ -35,5 +35,7 @@ abstract class GastosDatasource {
 
   Future<GastoLike> enviarImagen(File imagen);
 
+  Future<List> obtenerCampoDetalle();
+
   Future<ConsultaSunat> validarGastoConSunat(GastoLike gasto);
 }
