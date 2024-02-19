@@ -339,12 +339,19 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   Future<bool> onFormActualizarSubmit() async {
-    _touchEveryField();
-
     bool esCentroCostoValido =
         listCampoDetalle.contains(state.centroCosto.value);
 
-    if (!state.isValid || !esCentroCostoValido) return false;
+    if (!esCentroCostoValido) {
+      _touchEveryField();
+      state = state.copyWith(centroCosto: CentroCosto.dirty(""));
+
+      return false;
+    }
+
+    _touchEveryField();
+
+    if (!state.isValid) return false;
     state = state.copyWith(isPosting: true);
 
     try {
@@ -365,12 +372,20 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   Future<bool> onFormSubmit() async {
-    _touchEveryField();
-
     bool esCentroCostoValido =
         listCampoDetalle.contains(state.centroCosto.value);
 
-    if (!state.isValid || !esCentroCostoValido) return false;
+    if (!esCentroCostoValido) {
+      _touchEveryField();
+      state =
+          state.copyWith(centroCosto: CentroCosto.dirty(""), isValid: false);
+
+      return false;
+    }
+
+    _touchEveryField();
+
+    if (!state.isValid) return false;
     state = state.copyWith(isPosting: true);
 
     DateTime? fechaEmisionParsed = parseFechaEmision(state.fechaEmision.value);

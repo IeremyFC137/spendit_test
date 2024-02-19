@@ -269,22 +269,12 @@ class _GastoInformation extends ConsumerWidget {
                 gastoForm.isFormPosted ? gastoForm.pimporte.errorMessage : null,
           ),
           DividerForm(),
-          /*CustomGastoField(
-            isTopField: false,
-            label: 'Centro de costo',
-            initialValue: gastoLike.cCosto!,
-            onChanged: ref
-                .read(gastoFormProvider(gastoLike).notifier)
-                .onCentroCostoChange,
-            errorMessage: gastoForm.isFormPosted
-                ? gastoForm.centroCosto.errorMessage
-                : null,
-          ),*/
           ElementoAutocompleteWidget(
               label: 'Centro de costo',
               maxLines: 2,
               isTopField: false,
               keyboardType: TextInputType.text,
+              initialValue: gastoLike.cCosto,
               elementos: listCcosto,
               errorMessage: gastoForm.isFormPosted
                   ? gastoForm.centroCosto.errorMessage

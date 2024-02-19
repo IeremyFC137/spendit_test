@@ -282,6 +282,9 @@ class _GastoForm extends ConsumerWidget {
                   if (!listCcosto.contains(value)) {
                     return 'Selecciona un valor válido de la lista.';
                   }
+                  if (value == null) {
+                    return 'El campo "Centro de costo" no puede estar en blanco';
+                  }
                   return null;
                 },
                 onChanged: ref
@@ -386,8 +389,6 @@ class _GastoForm extends ConsumerWidget {
                     final isSuccess = await ref
                         .read(gastoFormProvider(gastoLike).notifier)
                         .onFormSubmit();
-
-                    print(isSuccess);
 
                     if (isSuccess) {
                       ScaffoldMessenger.of(context).showSnackBar(

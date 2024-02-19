@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spendit_test/features/shared/shared.dart';
 
-class ElementoAutocompleteWidget extends ConsumerWidget {
+class ElementoAutocompleteWidget extends StatefulWidget {
   final List<String> elementos;
   final void Function(String) onChanged;
   final bool isTopField;
   final bool isBottomField;
   final String? label;
   final String? hint;
-
   final bool obscureText;
   final String? errorMessage;
-  final GlobalKey<FormState>? formKey;
   final int maxLines;
   final bool enabled;
   final TextInputType keyboardType;
   final void Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
+  final String? initialValue;
 
   ElementoAutocompleteWidget({
     Key? key,
-    this.formKey,
     required this.elementos,
     required this.onChanged,
     this.isTopField = false,
@@ -35,17 +32,28 @@ class ElementoAutocompleteWidget extends ConsumerWidget {
     this.keyboardType = TextInputType.text,
     this.onFieldSubmitted,
     this.validator,
+    this.initialValue,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ElementoAutocompleteWidgetState createState() =>
+      _ElementoAutocompleteWidgetState();
+}
+
+class _ElementoAutocompleteWidgetState
+    extends State<ElementoAutocompleteWidget> {
+  // Indicador para rastrear si el valor inicial ya ha sido asignado.
+  bool _isInitialValueAssigned = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text.isEmpty || textEditingValue.text.length < 2) {
           return const Iterable<String>.empty();
         }
-        return elementos.where((String str) =>
-            str.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+        return widget.elementos.where((String option) =>
+            option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
       },
       displayStringForOption: (String option) => option,
       fieldViewBuilder: (
@@ -54,25 +62,31 @@ class ElementoAutocompleteWidget extends ConsumerWidget {
         FocusNode fieldFocusNode,
         VoidCallback onFieldSubmittedVoidCallback,
       ) {
+        // Asigna el valor inicial solo una vez y si aún no se ha asignado.
+        if (widget.initialValue != null && !_isInitialValueAssigned) {
+          fieldTextEditingController.text = widget.initialValue!;
+          _isInitialValueAssigned = true;
+        }
+
         return CustomGastoField(
           focusNode: fieldFocusNode,
           controller: fieldTextEditingController,
-          isBottomField: isBottomField,
-          isTopField: isTopField,
-          label: label,
-          hint: hint,
-          errorMessage: errorMessage,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          onChanged: onChanged,
-          onFieldSubmitted: onFieldSubmitted,
-          validator: validator,
-          enabled: enabled,
+          isBottomField: widget.isBottomField,
+          isTopField: widget.isTopField,
+          label: widget.label,
+          hint: widget.hint,
+          errorMessage: widget.errorMessage,
+          obscureText: widget.obscureText,
+          keyboardType: widget.keyboardType,
+          maxLines: widget.maxLines,
+          onChanged: widget.onChanged,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          validator: widget.validator,
+          enabled: widget.enabled,
         );
       },
       onSelected: (String selection) {
-        onChanged(selection);
+        widget.onChanged(selection);
       },
     );
   }
