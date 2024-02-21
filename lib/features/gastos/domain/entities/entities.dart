@@ -7,3 +7,4 @@ export 'moneda.dart';
 export 'tipo_documento.dart';
 export 'gasto_like.dart';
 export 'consulta_sunat.dart';
+export 'detalles_gasto.dart';

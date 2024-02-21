@@ -71,7 +71,6 @@ class _LoginForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final loginForm = ref.watch(loginFormProvider);
-
     ref.listen(authProvider, (previous, next) {
       if (next.errorMessage.isEmpty) return;
       showSnackbar(context, next.errorMessage);

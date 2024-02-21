@@ -60,10 +60,17 @@ class GastosSearchDelegate extends SearchDelegate {
 
     // Filtrar la lista de gastos
     final resultados = gastosState.gastos.where((gasto) {
-      return gasto.proveedor.toLowerCase().contains(query.toLowerCase()) ||
-          gasto.cCosto.toLowerCase().contains(query.toLowerCase()) ||
-          gasto.cGasto.toLowerCase().contains(query.toLowerCase()) ||
-          gasto.cContable.toLowerCase().contains(query.toLowerCase());
+      // Verificar si el proveedor del gasto contiene la consulta
+      bool proveedorMatch =
+          gasto.proveedor.toLowerCase().contains(query.toLowerCase());
+
+      // Verificar si algún detalle del gasto contiene la consulta en cCosto, cGasto, o cContable
+      bool detallesMatch = gasto.detalles.any((detalle) =>
+          detalle.cCosto.toLowerCase().contains(query.toLowerCase()) ||
+          detalle.cGasto.toLowerCase().contains(query.toLowerCase()) ||
+          detalle.cContable.toLowerCase().contains(query.toLowerCase()));
+
+      return proveedorMatch || detallesMatch;
     }).toList();
 
     // Devolver la lista filtrada
@@ -109,7 +116,6 @@ class GastosSearchDelegate extends SearchDelegate {
             await container
                 .read(gastosProvider.notifier)
                 .eliminarGasto(gasto.id);
-
             showResults(context);
           },
           child: Padding(
@@ -129,6 +135,6 @@ class GastosSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Container(); // Dev
+    return Container();
   }
 }

@@ -10,12 +10,8 @@ class Gasto {
   final DateTime fechaEmision;
   final double subTotal;
   final double igv;
-  final double importe;
-  final double pImporte;
   final Moneda moneda;
-  final String cCosto;
-  final String cGasto;
-  final String cContable;
+  final List<DetallesGasto> detalles;
   final String estado;
   List<String> images;
   Gasto(
@@ -28,12 +24,8 @@ class Gasto {
       required this.fechaEmision,
       required this.subTotal,
       required this.igv,
-      required this.importe,
-      required this.pImporte,
       required this.moneda,
-      required this.cCosto,
-      required this.cGasto,
-      required this.cContable,
+      required this.detalles,
       required this.estado,
       required this.images});
 }

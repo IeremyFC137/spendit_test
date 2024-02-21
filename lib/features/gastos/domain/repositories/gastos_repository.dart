@@ -12,24 +12,15 @@ abstract class GastosRepository {
       required DateTime fecha_emision,
       required double subTotal,
       required double igv,
-      required double importe,
-      required double pImporte,
       required Moneda moneda,
-      required String cCosto,
-      required String cGasto,
-      required String cContable});
+      required List<DetallesGasto> detalles});
 
   Future<void> eliminarGasto(int gastoId);
 
   Future<Gasto> getGastoById(int gastoId);
 
   Future<Gasto> editarGasto(
-      {required int gastoId,
-      String? cCosto,
-      String? cGasto,
-      String? cContable,
-      double? importe,
-      double? pImporte});
+      {required int gastoId, required List<DetallesGasto> detalles});
 
   Future<List<Gasto>> listarGastos({int size = 7, int page = 0});
 

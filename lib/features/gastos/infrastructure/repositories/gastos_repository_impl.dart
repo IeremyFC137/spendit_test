@@ -10,19 +10,8 @@ class GastosRepositoryImpl extends GastosRepository {
 
   @override
   Future<Gasto> editarGasto(
-      {required int gastoId,
-      String? cCosto,
-      String? cGasto,
-      String? cContable,
-      double? importe,
-      double? pImporte}) {
-    return datasource.editarGasto(
-        gastoId: gastoId,
-        cCosto: cCosto,
-        cContable: cContable,
-        cGasto: cGasto,
-        importe: importe,
-        pImporte: pImporte);
+      {required int gastoId, required List<DetallesGasto> detalles}) {
+    return datasource.editarGasto(gastoId: gastoId, detalles: detalles);
   }
 
   @override
@@ -50,12 +39,8 @@ class GastosRepositoryImpl extends GastosRepository {
       required DateTime fecha_emision,
       required double subTotal,
       required double igv,
-      required double importe,
-      required double pImporte,
       required Moneda moneda,
-      required String cCosto,
-      required String cGasto,
-      required String cContable}) {
+      required List<DetallesGasto> detalles}) {
     return datasource.registrarGasto(
         idUsuario: idUsuario,
         proveedor: proveedor,
@@ -65,12 +50,8 @@ class GastosRepositoryImpl extends GastosRepository {
         fecha_emision: fecha_emision,
         subTotal: subTotal,
         igv: igv,
-        importe: importe,
-        pImporte: pImporte,
         moneda: moneda,
-        cCosto: cCosto,
-        cGasto: cGasto,
-        cContable: cContable);
+        detalles: detalles);
   }
 
   @override

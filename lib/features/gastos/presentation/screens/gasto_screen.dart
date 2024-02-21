@@ -40,14 +40,11 @@ class GastoScreen extends ConsumerWidget {
                 fechaEmision: DateTime.now(),
                 subTotal: 0.0,
                 igv: 0.0,
-                importe: 0.0,
-                pImporte: 0.0,
+                detalles: [],
                 moneda: Moneda.SOLES,
-                cCosto: '',
-                cGasto: '',
-                cContable: '',
                 estado: '',
                 images: []));
+    List<int> ids = gastoLike.detalles!.map((detalle) => detalle.id).toList();
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -86,7 +83,7 @@ class GastoScreen extends ConsumerWidget {
               if (gastoState.gasto == null) return;
               ref
                   .read(gastoFormProvider(gastoLike).notifier)
-                  .onFormActualizarSubmit()
+                  .onFormActualizarSubmit(ids)
                   .then((value) {
                 if (!value) return;
                 showSnackbar(context);
@@ -203,117 +200,50 @@ class _GastoInformation extends ConsumerWidget {
             ]),
           ),
           const SizedBox(height: 20),
-          Row(children: [
-            Text('Detalles',
-                style: TextStyle(
-                    fontSize: 18,
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(
-              width: 8,
-            ),
-            FaIcon(
-              FontAwesomeIcons.circleInfo,
-            )
-          ]),
+          Row(
+            children: [
+              Text("Detalles",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  )),
+              SizedBox(
+                width: 5,
+              ),
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.solidSquarePlus,
+                    color: colors.primary, size: 30),
+                onPressed: () => ref
+                    .read(gastoFormProvider(gastoLike).notifier)
+                    .addDetalle(),
+              )
+            ],
+          ),
           const SizedBox(height: 20),
-          CustomGastoField(
-            isTopField: true,
-            label: 'Importe',
-            keyboardType: TextInputType.number,
-            initialValue: "${gastoLike.importe!}",
-            onChanged: (value) {
-              double? parsedValue = double.tryParse(value);
-              if (parsedValue == null) {
-                ref
-                    .read(gastoFormProvider(gastoLike).notifier)
-                    .onImporteChange(0.0);
-              } else {
-                ref
-                    .read(gastoFormProvider(gastoLike).notifier)
-                    .onImporteChange(parsedValue);
-              }
-            },
-            errorMessage:
-                gastoForm.isFormPosted ? gastoForm.importe.errorMessage : null,
-          ),
-          DividerForm(),
-          CustomGastoField(
-            isTopField: false,
-            label:
-                "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
-            keyboardType: TextInputType.number,
-            initialValue: "${(gastoLike.pImporte! * 100).round()}",
-            onChanged: (value) {
-              double? parsedValue = double.tryParse(value);
-              if (parsedValue == null) {
-                ref
-                    .read(gastoFormProvider(gastoLike).notifier)
-                    .onPimporteChange(0.0);
-              } else {
-                ref
-                    .read(gastoFormProvider(gastoLike).notifier)
-                    .onPimporteChange(parsedValue / 100);
-              }
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty)
-                return 'Este campo es obligatorio';
-              final numberValue = double.tryParse(value);
-              if (numberValue == null) return 'Debe ser un número';
-              if (numberValue < 0 || numberValue > 100)
-                return 'Debe estar entre 0 y 100';
-              return null;
-            },
-            errorMessage:
-                gastoForm.isFormPosted ? gastoForm.pimporte.errorMessage : null,
-          ),
-          DividerForm(),
-          ElementoAutocompleteWidget(
-              label: 'Centro de costo',
-              maxLines: 2,
-              isTopField: false,
-              keyboardType: TextInputType.text,
-              initialValue: gastoLike.cCosto,
-              elementos: listCcosto,
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.centroCosto.errorMessage
-                  : null,
-              validator: (value) {
-                if (!listCcosto.contains(value)) {
-                  return 'Selecciona un valor válido de la lista.';
-                }
-                return null;
-              },
-              onChanged: ref
-                  .read(gastoFormProvider(gastoLike).notifier)
-                  .onCentroCostoChange),
-          DividerForm(),
-          CustomGastoField(
-            isTopField: false,
-            label: 'Concepto de gasto',
-            initialValue: gastoLike.cGasto!,
-            onChanged: ref
+          /*Comienzo detalles actualizar*/
+          DetallesWidget(
+            gastoFormState: gastoForm,
+            listCcosto: listCcosto,
+            onCentroCostoChanged: ref
                 .read(gastoFormProvider(gastoLike).notifier)
-                .onConceptoGastoChange,
-            errorMessage: gastoForm.isFormPosted
-                ? gastoForm.conceptoGasto.errorMessage
-                : null,
-          ),
-          DividerForm(),
-          CustomGastoField(
-            isTopField: false,
-            isBottomField: true,
-            label: 'Cuenta contable',
-            initialValue: gastoLike.cContable!,
-            onChanged: ref
+                .onCentrosCostoChange,
+            onConceptoGastoChanged: ref
                 .read(gastoFormProvider(gastoLike).notifier)
-                .onCuentaContableChange,
-            errorMessage: gastoForm.isFormPosted
-                ? gastoForm.cuentaContable.errorMessage
-                : null,
+                .onConceptosGastoChange,
+            onCuentaContableChanged: ref
+                .read(gastoFormProvider(gastoLike).notifier)
+                .onCuentasContableChange,
+            onImporteChanged: ref
+                .read(gastoFormProvider(gastoLike).notifier)
+                .onImportesChange,
+            onPImporteChanged: ref
+                .read(gastoFormProvider(gastoLike).notifier)
+                .onPimportesChange,
+            removeDetalle:
+                ref.read(gastoFormProvider(gastoLike).notifier).removeDetalle,
           ),
-          const SizedBox(height: 50),
+          /*Fin detalles actualizar*/
+          const SizedBox(height: 10),
           Center(
             child: CustomFilledButton(
               onPressed: () async {

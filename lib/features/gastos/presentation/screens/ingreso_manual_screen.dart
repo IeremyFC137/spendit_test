@@ -211,7 +211,6 @@ class _GastoForm extends ConsumerWidget {
                 child: CustomGastoField(
                   maxLines: 2,
                   label: 'Fecha de emisión',
-                  //isTopField: false,
                   keyboardType: TextInputType.datetime,
                   onChanged: (_) {},
                   errorMessage: gastoForm.isFormPosted
@@ -259,123 +258,52 @@ class _GastoForm extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     )),
                 SizedBox(
-                  width: 8,
+                  width: 5,
                 ),
-                FaIcon(
-                  FontAwesomeIcons.circleInfo,
+                IconButton(
+                  icon: FaIcon(
+                    FontAwesomeIcons.solidSquarePlus,
+                    color: colors.primary,
+                    size: 30,
+                  ),
+                  onPressed: () => ref
+                      .read(gastoFormProvider(gastoLike).notifier)
+                      .addDetalle(),
+                ),
+                Text(
+                  "(Añadir más detalles)",
+                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 13),
                 )
               ],
             ),
             SizedBox(
               height: 20,
             ),
-            ElementoAutocompleteWidget(
-                label: 'Centro de costo',
-                maxLines: 2,
-                isTopField: true,
-                keyboardType: TextInputType.text,
-                elementos: listCcosto,
-                errorMessage: gastoForm.isFormPosted
-                    ? gastoForm.centroCosto.errorMessage
-                    : null,
-                validator: (value) {
-                  if (!listCcosto.contains(value)) {
-                    return 'Selecciona un valor válido de la lista.';
-                  }
-                  if (value == null) {
-                    return 'El campo "Centro de costo" no puede estar en blanco';
-                  }
-                  return null;
-                },
-                onChanged: ref
-                    .read(gastoFormProvider(gastoLike).notifier)
-                    .onCentroCostoChange),
-            DividerForm(),
-            /*CustomGastoField(
-              maxLines: 2,
-              label: 'Centro de costo',
-              isTopField: true,
-              keyboardType: TextInputType.text,
-              onChanged: ref
+            /*CODIGO A CAMBIAR COMIENZO*/
+            DetallesWidget(
+              gastoFormState: gastoForm,
+              listCcosto: listCcosto,
+              onCentroCostoChanged: ref
                   .read(gastoFormProvider(gastoLike).notifier)
-                  .onCentroCostoChange,
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.centroCosto.errorMessage
-                  : null,
-            ),
-            DividerForm(),*/
-            CustomGastoField(
-              maxLines: 2,
-              label: 'Concepto de gasto',
-              isTopField: false,
-              keyboardType: TextInputType.text,
-              onChanged: ref
+                  .onCentrosCostoChange,
+              onConceptoGastoChanged: ref
                   .read(gastoFormProvider(gastoLike).notifier)
-                  .onConceptoGastoChange,
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.conceptoGasto.errorMessage
-                  : null,
-            ),
-            DividerForm(),
-            CustomGastoField(
-              maxLines: 2,
-              label: 'Cuenta contable',
-              isTopField: false,
-              keyboardType: TextInputType.text,
-              onChanged: ref
+                  .onConceptosGastoChange,
+              onCuentaContableChanged: ref
                   .read(gastoFormProvider(gastoLike).notifier)
-                  .onCuentaContableChange,
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.cuentaContable.errorMessage
-                  : null,
+                  .onCuentasContableChange,
+              onImporteChanged: ref
+                  .read(gastoFormProvider(gastoLike).notifier)
+                  .onImportesChange,
+              onPImporteChanged: ref
+                  .read(gastoFormProvider(gastoLike).notifier)
+                  .onPimportesChange,
+              removeDetalle:
+                  ref.read(gastoFormProvider(gastoLike).notifier).removeDetalle,
             ),
-            DividerForm(),
-            CustomGastoField(
-              maxLines: 2,
-              label: 'Importe',
-              isTopField: false,
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                double? parsedValue = double.tryParse(value);
-                if (parsedValue == null) {
-                  ref
-                      .read(gastoFormProvider(gastoLike).notifier)
-                      .onImporteChange(0.0);
-                } else {
-                  ref
-                      .read(gastoFormProvider(gastoLike).notifier)
-                      .onImporteChange(parsedValue);
-                }
-              },
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.importe.errorMessage
-                  : null,
-            ),
-            DividerForm(),
-            CustomGastoField(
-              maxLines: 2,
-              label:
-                  "Porcentaje de importe (${(gastoForm.pimporte.value * 100).toStringAsFixed(0)}%)",
-              keyboardType: TextInputType.number,
-              isBottomField: true,
-              onChanged: (value) {
-                double? parsedValue = double.tryParse(value);
-                if (parsedValue == null) {
-                  ref
-                      .read(gastoFormProvider(gastoLike).notifier)
-                      .onPimporteChange(0.0);
-                } else {
-                  ref
-                      .read(gastoFormProvider(gastoLike).notifier)
-                      .onPimporteChange(parsedValue / 100);
-                }
-              },
-              errorMessage: gastoForm.isFormPosted
-                  ? gastoForm.pimporte.errorMessage
-                  : null,
-            ),
+            /*CODIGO A CAMBIAR FIN*/
             SizedBox(
-              height: 50,
+              height: 10,
             ),
             Center(
               child: SizedBox(

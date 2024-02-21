@@ -12,12 +12,8 @@ class GastoLikeMapper {
       fechaEmision: gasto.fechaEmision,
       subTotal: gasto.subTotal,
       igv: gasto.igv,
-      importe: gasto.importe,
-      pImporte: gasto.pImporte,
       moneda: gasto.moneda,
-      cCosto: gasto.cCosto,
-      cGasto: gasto.cGasto,
-      cContable: gasto.cContable,
+      detalles: gasto.detalles,
       images: gasto.images);
 
   static scanitJsonToGastoLikeEntity(Map<String, dynamic> json) => GastoLike(

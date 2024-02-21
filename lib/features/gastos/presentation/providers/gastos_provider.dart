@@ -42,41 +42,26 @@ class GastosNotifier extends StateNotifier<GastosState> {
         gastos: [...state.gastos, ...gastos]);
   }
 
-  Future<bool> editarGasto(int gastoId, String? cCosto, String? cGasto,
-      String? cContable, double importe, double pImporte) async {
+  Future<bool> editarGasto(
+      int gastoId, List<DetallesGasto> detallesActualizados) async {
     try {
-      var aux =
-          state.gastos.where((element) => element.id == gastoId).toList()[0];
-      if (aux.cCosto == cCosto) {
-        cCosto = null;
+      final Gasto gastoActualizado = await gastosRepository.editarGasto(
+        gastoId: gastoId,
+        detalles: detallesActualizados,
+      );
+
+      final int index = state.gastos.indexWhere((gasto) => gasto.id == gastoId);
+      if (index != -1) {
+        final List<Gasto> updatedGastos = List<Gasto>.from(state.gastos);
+        updatedGastos[index] = gastoActualizado;
+
+        state = state.copyWith(gastos: updatedGastos);
+      } else {
+        return false;
       }
-      if (aux.cGasto == cGasto) {
-        cGasto = null;
-      }
-      if (aux.cContable == cContable) {
-        cContable = null;
-      }
-      if (aux.importe == importe) {
-        importe = 0.0;
-      }
-      if (aux.pImporte == pImporte) {
-        pImporte = 2.0;
-      }
-      final gasto = await gastosRepository.editarGasto(
-          gastoId: gastoId,
-          cContable: cContable,
-          cCosto: cCosto,
-          cGasto: cGasto,
-          importe: importe,
-          pImporte: pImporte);
-      state = state.copyWith(
-          gastos: state.gastos
-              .map(
-                (element) => (element.id == gasto.id) ? gasto : element,
-              )
-              .toList());
       return true;
     } catch (e) {
+      print(e);
       return false;
     }
   }
@@ -87,37 +72,30 @@ class GastosNotifier extends StateNotifier<GastosState> {
       String ruc,
       TipoDocumento tipoDocumento,
       String documento,
-      DateTime fecha_emision,
+      DateTime fechaEmision,
       double subTotal,
       double igv,
-      double importe,
-      double pImporte,
       Moneda moneda,
-      String cCosto,
-      String cGasto,
-      String cContable) async {
+      List<DetallesGasto> detalles) async {
     try {
       state = state.copyWith(isLoading: true);
       final gasto = await gastosRepository.registrarGasto(
-          idUsuario: idUsuario,
-          proveedor: proveedor,
-          ruc: ruc,
-          tipoDocumento: tipoDocumento,
-          documento: documento,
-          fecha_emision: fecha_emision,
-          subTotal: subTotal,
-          igv: igv,
-          importe: importe,
-          pImporte: pImporte,
-          moneda: moneda,
-          cCosto: cCosto,
-          cGasto: cGasto,
-          cContable: cContable);
+        idUsuario: idUsuario,
+        proveedor: proveedor,
+        ruc: ruc,
+        tipoDocumento: tipoDocumento,
+        documento: documento,
+        fecha_emision: fechaEmision,
+        subTotal: subTotal,
+        igv: igv,
+        moneda: moneda,
+        detalles: detalles,
+      );
       state =
           state.copyWith(gastos: [...state.gastos, gasto], isLoading: false);
     } catch (e) {
-      state.copyWith(isLoading: false);
-      print(e);
+      state = state.copyWith(isLoading: false);
+      print(e); // Considera manejar este error de forma más adecuada
     }
   }
 

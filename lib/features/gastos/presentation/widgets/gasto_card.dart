@@ -10,6 +10,10 @@ class GastoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String concatenadoCCostos = gasto.detalles
+        .map((detalle) =>
+            detalle.cCosto.substring(0, 6)) // Toma los 6 primeros caracteres
+        .join(" - ");
     return ListTile(
       leading: SvgPicture.asset(
         'assets/img/image.svg',
@@ -23,9 +27,7 @@ class GastoCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            gasto.cCosto.length > 37
-                ? '${gasto.cCosto.substring(0, 37)}...'
-                : gasto.cCosto,
+            concatenadoCCostos,
             style: TextStyle(color: Colors.black.withOpacity(0.6)),
           ),
           Text(DateFormat('yyyy-MM-dd').format(gasto.fechaEmision).toString(),

@@ -18,27 +18,32 @@ class GastosDatasourceImpl extends GastosDatasource {
             headers: {'Authorization': 'Bearer $accessToken'}));
 
   @override
-  Future<Gasto> editarGasto(
-      {required int gastoId,
-      String? cCosto,
-      String? cGasto,
-      String? cContable,
-      double? importe,
-      double? pImporte}) async {
+  Future<Gasto> editarGasto({
+    required int gastoId,
+    required List<DetallesGasto> detalles,
+  }) async {
+    final detallesData = detalles
+        .map((detalle) => {
+              "detalleId": detalle.id,
+              "c_costo": detalle.cCosto,
+              "c_gasto": detalle.cGasto,
+              "c_contable": detalle.cContable,
+              "importe": detalle.importe,
+              "p_importe": detalle.pImporte,
+            })
+        .toList();
+
     final Map<String, dynamic> data = {
       'id': gastoId,
+      'detalles': detallesData,
     };
-    if (cCosto != null) data['c_costo'] = cCosto;
-    if (cGasto != null) data['c_gasto'] = cGasto;
-    if (cContable != null) data['c_contable'] = cContable;
-    if (importe != 0.0) data['importe'] = importe;
-    if (pImporte != 2.0) data['p_importe'] = pImporte;
+
     try {
       final response = await dio.put("/gastos", data: data);
       final Gasto gasto = GastoMapper.gastoJsonToEntity(response.data);
       return gasto;
     } on DioException catch (e) {
-      if (e.response!.statusCode == 404) {
+      if (e.response?.statusCode == 404) {
         throw GastoNotFound();
       }
       throw Exception();
@@ -81,21 +86,18 @@ class GastosDatasourceImpl extends GastosDatasource {
   }
 
   @override
-  Future<Gasto> registrarGasto(
-      {required int idUsuario,
-      required String proveedor,
-      required String ruc,
-      required TipoDocumento tipoDocumento,
-      required String documento,
-      required DateTime fecha_emision,
-      required double subTotal,
-      required double igv,
-      required double importe,
-      required double pImporte,
-      required Moneda moneda,
-      required String cCosto,
-      required String cGasto,
-      required String cContable}) async {
+  Future<Gasto> registrarGasto({
+    required int idUsuario,
+    required String proveedor,
+    required String ruc,
+    required TipoDocumento tipoDocumento,
+    required String documento,
+    required DateTime fecha_emision,
+    required double subTotal,
+    required double igv,
+    required Moneda moneda,
+    required List<DetallesGasto> detalles,
+  }) async {
     final response = await dio.post("/gastos", data: {
       'idUsuario': idUsuario,
       'proveedor': proveedor,
@@ -105,12 +107,16 @@ class GastosDatasourceImpl extends GastosDatasource {
       'fecha_emision': formatDateTime(fecha_emision),
       'sub_total': subTotal,
       'igv': igv,
-      'importe': importe,
-      'p_importe': pImporte,
       'moneda': moneda.name,
-      'c_costo': cCosto,
-      'c_gasto': cGasto,
-      'c_contable': cContable
+      'detalles': detalles
+          .map((d) => {
+                "c_costo": d.cCosto,
+                "c_gasto": d.cGasto,
+                "c_contable": d.cContable,
+                "importe": d.importe,
+                "p_importe": d.pImporte
+              })
+          .toList()
     });
     Gasto gasto = GastoMapper.gastoJsonToEntity(response.data);
     return gasto;

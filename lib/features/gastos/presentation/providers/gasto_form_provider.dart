@@ -42,8 +42,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
             tipoDocumento: DocumentType.dirty(
                 gastoLike?.tipoDocumento ?? TipoDocumento.BOLETA),
             numeroDocumento: DocumentNumber.dirty(gastoLike?.documento ?? ''),
-            fechaEmision: FechaEmision.dirty(DateFormat('yyyy-MM-dd').format(
-                        gastoLike?.fechaEmision ?? DateTime(2024, 01, 01))) ==
+            fechaEmision: FechaEmision.dirty(DateFormat('yyyy-MM-dd').format(gastoLike?.fechaEmision ?? DateTime(2024, 01, 01))) ==
                     FechaEmision.dirty("2024-01-01")
                 ? FechaEmision.dirty('')
                 : FechaEmision.dirty(
@@ -51,55 +50,94 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
             subTotal: SubTotal.dirty(gastoLike?.subTotal ?? 0.0),
             igv: Igv.dirty(gastoLike?.igv ?? 0.0),
             moneda: MoneyType.dirty(gastoLike?.moneda ?? Moneda.SOLES),
-            centroCosto: CentroCosto.dirty(gastoLike?.cCosto ?? ''),
-            conceptoGasto: ConceptoGasto.dirty(gastoLike?.cGasto ?? ''),
-            cuentaContable: CuentaContable.dirty(gastoLike?.cContable ?? ''),
-            importe: Importe.dirty(gastoLike?.importe ?? 0.0),
-            pimporte: Pimporte.dirty(
-              gastoLike?.pImporte ?? 0.0,
-            ),
+            centrosCosto: gastoLike?.detalles
+                    ?.map((d) => CentroCosto.dirty(d.cCosto))
+                    .toList() ??
+                [CentroCosto.pure()],
+            conceptosGasto: gastoLike?.detalles
+                    ?.map((d) => ConceptoGasto.dirty(d.cGasto))
+                    .toList() ??
+                [ConceptoGasto.pure()],
+            cuentasContables: gastoLike?.detalles
+                    ?.map((d) => CuentaContable.dirty(d.cContable))
+                    .toList() ??
+                [CuentaContable.pure()],
+            importes: gastoLike?.detalles?.map((d) => Importe.dirty(d.importe)).toList() ?? [Importe.pure()],
+            pimportes: gastoLike?.detalles?.map((d) => Pimporte.dirty(d.pImporte)).toList() ?? [Pimporte.pure()],
             images: gastoLike?.images ?? []));
 
-  onProveedorChange(String value) {
-    final newProveedor = Proveedor.dirty(value);
+  void addDetalle() {
     state = state.copyWith(
-        proveedor: newProveedor,
-        isValid: Formz.validate([
-          newProveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
-        ]));
+      centrosCosto: List.from(state.centrosCosto)..add(CentroCosto.pure()),
+      conceptosGasto: List.from(state.conceptosGasto)
+        ..add(ConceptoGasto.pure()),
+      cuentasContables: List.from(state.cuentasContables)
+        ..add(CuentaContable.pure()),
+      importes: List.from(state.importes)..add(Importe.pure()),
+      pimportes: List.from(state.pimportes)..add(Pimporte.pure()),
+    );
   }
 
-  onRucChange(String value) {
-    final newRuc = Ruc.dirty(value);
+  void removeDetalle(int index) {
+    if (state.centrosCosto.length > 1) {
+      state = state.copyWith(
+        centrosCosto: List.from(state.centrosCosto)..removeAt(index),
+        conceptosGasto: List.from(state.conceptosGasto)..removeAt(index),
+        cuentasContables: List.from(state.cuentasContables)..removeAt(index),
+        importes: List.from(state.importes)..removeAt(index),
+        pimportes: List.from(state.pimportes)..removeAt(index),
+      );
+    }
+  }
+
+  void onProveedorChange(String value) {
+    final newProveedor = Proveedor.dirty(value);
+
+    final isValid = Formz.validate([
+      newProveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...state.centrosCosto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...state.importes,
+      ...state.pimportes,
+    ]);
+
     state = state.copyWith(
-        ruc: newRuc,
-        isValid: Formz.validate([
-          state.proveedor,
-          newRuc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
-        ]));
+      proveedor: newProveedor,
+      isValid: isValid,
+    );
+  }
+
+  void onRucChange(String value) {
+    final newRuc = Ruc.dirty(value);
+
+    final isValid = Formz.validate([
+      state.proveedor,
+      newRuc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...state.centrosCosto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...state.importes,
+      ...state.pimportes,
+    ]);
+
+    state = state.copyWith(
+      ruc: newRuc,
+      isValid: isValid,
+    );
   }
 
   onTipoDocumentoChange(TipoDocumento value) {
@@ -115,11 +153,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.subTotal,
           state.igv,
           state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
@@ -136,11 +174,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.subTotal,
           state.igv,
           state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
@@ -157,11 +195,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.subTotal,
           state.igv,
           state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
@@ -178,11 +216,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           newSubTotal,
           state.igv,
           state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
@@ -199,11 +237,11 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.subTotal,
           newIgv,
           state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
@@ -220,186 +258,220 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
           state.subTotal,
           state.igv,
           newMoneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
+          ...state.centrosCosto,
+          ...state.conceptosGasto,
+          ...state.cuentasContables,
+          ...state.importes,
+          ...state.pimportes,
         ]));
   }
 
-  onCentroCostoChange(String value) {
-    final newCentroCosto = CentroCosto.dirty(value);
+  void onCentrosCostoChange(int index, String value) {
+    final List<CentroCosto> updatedCentrosCosto =
+        List<CentroCosto>.from(state.centrosCosto);
+    updatedCentrosCosto[index] = CentroCosto.dirty(value);
+    final isValid = Formz.validate([
+      state.proveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...updatedCentrosCosto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...state.importes,
+      ...state.pimportes,
+    ]);
+
     state = state.copyWith(
-        centroCosto: newCentroCosto,
-        isValid: Formz.validate([
-          state.proveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          newCentroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
-        ]));
+      centrosCosto: updatedCentrosCosto,
+      isValid: isValid,
+    );
   }
 
-  onConceptoGastoChange(String value) {
-    final newConceptoGasto = ConceptoGasto.dirty(value);
+  onConceptosGastoChange(int index, String value) {
+    final List<ConceptoGasto> updatedConceptosGasto =
+        List<ConceptoGasto>.from(state.conceptosGasto);
+    updatedConceptosGasto[index] = ConceptoGasto.dirty(value);
+    final isValid = Formz.validate([
+      state.proveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...updatedConceptosGasto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...state.importes,
+      ...state.pimportes,
+    ]);
+
     state = state.copyWith(
-        conceptoGasto: newConceptoGasto,
-        isValid: Formz.validate([
-          state.proveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          newConceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          state.pimporte
-        ]));
+      conceptosGasto: updatedConceptosGasto,
+      isValid: isValid,
+    );
   }
 
-  onCuentaContableChange(String value) {
-    final newCuentaContable = CuentaContable.dirty(value);
+  onCuentasContableChange(int index, String value) {
+    final List<CuentaContable> updatedCuentasContable =
+        List<CuentaContable>.from(state.cuentasContables);
+    updatedCuentasContable[index] = CuentaContable.dirty(value);
+
+    final isValid = Formz.validate([
+      state.proveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...updatedCuentasContable,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...state.importes,
+      ...state.pimportes,
+    ]);
+
     state = state.copyWith(
-        cuentaContable: newCuentaContable,
-        isValid: Formz.validate([
-          state.proveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          newCuentaContable,
-          state.importe,
-          state.pimporte
-        ]));
+      cuentasContables: updatedCuentasContable,
+      isValid: isValid,
+    );
   }
 
-  onImporteChange(double value) {
-    final newImporte = Importe.dirty(value);
+  void onImportesChange(int index, double value) {
+    final List<Importe> updatedImportes = List<Importe>.from(state.importes);
+    updatedImportes[index] = Importe.dirty(value);
+
+    final isValid = Formz.validate([
+      state.proveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...state.centrosCosto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...updatedImportes,
+      ...state.pimportes,
+    ]);
 
     state = state.copyWith(
-        importe: newImporte,
-        isValid: Formz.validate([
-          state.proveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          newImporte,
-          state.pimporte
-        ]));
+      importes: updatedImportes,
+      isValid: isValid,
+    );
   }
 
-  onPimporteChange(double value) {
-    final newPimporte = Pimporte.dirty(value);
+  onPimportesChange(int index, double value) {
+    final List<Pimporte> updatedPimportes =
+        List<Pimporte>.from(state.pimportes);
+    updatedPimportes[index] = Pimporte.dirty(value);
+
+    final isValid = Formz.validate([
+      state.proveedor,
+      state.ruc,
+      state.tipoDocumento,
+      state.numeroDocumento,
+      state.fechaEmision,
+      state.subTotal,
+      state.igv,
+      state.moneda,
+      ...state.centrosCosto,
+      ...state.conceptosGasto,
+      ...state.cuentasContables,
+      ...updatedPimportes,
+      ...state.pimportes,
+    ]);
+
     state = state.copyWith(
-        pimporte: newPimporte,
-        isValid: Formz.validate([
-          state.proveedor,
-          state.ruc,
-          state.tipoDocumento,
-          state.numeroDocumento,
-          state.fechaEmision,
-          state.subTotal,
-          state.igv,
-          state.moneda,
-          state.centroCosto,
-          state.conceptoGasto,
-          state.cuentaContable,
-          state.importe,
-          newPimporte
-        ]));
+      pimportes: updatedPimportes,
+      isValid: isValid,
+    );
   }
 
   void updateGastoImage(String path) {
     state = state.copyWith(images: [path]);
   }
 
-  Future<bool> onFormActualizarSubmit() async {
-    bool esCentroCostoValido =
-        listCampoDetalle.contains(state.centroCosto.value);
-
-    if (!esCentroCostoValido) {
-      _touchEveryField();
-      state = state.copyWith(centroCosto: CentroCosto.dirty(""));
-
-      return false;
-    }
-
+  Future<bool> onFormActualizarSubmit(List<int> ids) async {
     _touchEveryField();
 
     if (!state.isValid) return false;
+
     state = state.copyWith(isPosting: true);
 
+    List<DetallesGasto> detallesActualizados = List.generate(
+      state.centrosCosto.length,
+      (index) => DetallesGasto(
+        id: ids[index],
+        cCosto: state.centrosCosto[index].value,
+        cGasto: state.conceptosGasto[index].value,
+        cContable: state.cuentasContables[index].value,
+        importe: state.importes[index].value,
+        pImporte: state.pimportes[index].value,
+      ),
+    );
+
     try {
-      var isSuccess = await gastoActualizarCallback(
-          state.id,
-          state.centroCosto.value,
-          state.conceptoGasto.value,
-          state.cuentaContable.value,
-          state.importe.value,
-          state.pimporte.value);
+      if (state.id == null) {
+        print("ID del gasto es nulo, no se puede actualizar.");
+        state = state.copyWith(isPosting: false);
+        return false;
+      }
+
+      bool isSuccess = await gastoActualizarCallback(
+        state.id!,
+        detallesActualizados,
+      );
+
       state = state.copyWith(isPosting: false);
       return isSuccess;
     } catch (e) {
-      Exception(e);
+      print(e);
       state = state.copyWith(isPosting: false);
       return false;
     }
   }
 
   Future<bool> onFormSubmit() async {
-    bool esCentroCostoValido =
-        listCampoDetalle.contains(state.centroCosto.value);
+    _touchEveryField();
 
-    if (!esCentroCostoValido) {
-      _touchEveryField();
-      state =
-          state.copyWith(centroCosto: CentroCosto.dirty(""), isValid: false);
-
+    if (!state.isValid) {
       return false;
     }
 
-    _touchEveryField();
-
-    if (!state.isValid) return false;
     state = state.copyWith(isPosting: true);
 
     DateTime? fechaEmisionParsed = parseFechaEmision(state.fechaEmision.value);
     if (fechaEmisionParsed == null) {
-      print(state.fechaEmision.value);
       print("Fecha de emisión no es válida o está en un formato incorrecto.");
-      // Maneja el caso de fecha nula aquí. Podrías establecer isPosting a false y retornar false.
       state = state.copyWith(isPosting: false);
       return false;
     }
 
+    List<DetallesGasto> detalles = List.generate(
+        state.centrosCosto.length,
+        (index) => DetallesGasto(
+              id: 0,
+              cCosto: state.centrosCosto[index].value,
+              cGasto: state.conceptosGasto[index].value,
+              cContable: state.cuentasContables[index].value,
+              importe: state.importes[index].value,
+              pImporte: state.pimportes[index].value,
+            ));
+
     try {
       await gastoRegistrarCallback(
-        user?.id, // Asegúrate de manejar el caso en que user sea null.
+        user?.id ?? 0,
         state.proveedor.value,
         state.ruc.value,
         state.tipoDocumento.value,
@@ -407,12 +479,8 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
         fechaEmisionParsed,
         state.subTotal.value,
         state.igv.value,
-        state.importe.value,
-        state.pimporte.value,
         state.moneda.value,
-        state.centroCosto.value,
-        state.conceptoGasto.value,
-        state.cuentaContable.value,
+        detalles,
       );
       state = state.copyWith(isPosting: false);
       return true; // Registro exitoso.
@@ -432,28 +500,41 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
     final subTotal = SubTotal.dirty(state.subTotal.value);
     final igv = Igv.dirty(state.igv.value);
     final moneda = MoneyType.dirty(state.moneda.value);
-    final centroCosto = CentroCosto.dirty(state.centroCosto.value);
-    final conceptoGasto = ConceptoGasto.dirty(state.conceptoGasto.value);
-    final cuentaContable = CuentaContable.dirty(state.cuentaContable.value);
-    final importe = Importe.dirty(state.importe.value);
-    final pimporte = Pimporte.dirty(state.pimporte.value);
+
+    final centrosCosto =
+        state.centrosCosto.map((c) => CentroCosto.dirty(c.value)).toList();
+    final conceptosGasto =
+        state.conceptosGasto.map((c) => ConceptoGasto.dirty(c.value)).toList();
+    final cuentasContables = state.cuentasContables
+        .map((c) => CuentaContable.dirty(c.value))
+        .toList();
+    final importes = state.importes.map((i) => Importe.dirty(i.value)).toList();
+    final pimportes =
+        state.pimportes.map((p) => Pimporte.dirty(p.value)).toList();
+
     state = state.copyWith(
-        isFormPosted: true,
-        isValid: Formz.validate([
-          proveedor,
-          ruc,
-          tipoDocumento,
-          numeroDocumento,
-          fechaEmision,
-          subTotal,
-          igv,
-          moneda,
-          centroCosto,
-          conceptoGasto,
-          cuentaContable,
-          importe,
-          pimporte,
-        ]));
+      centrosCosto: centrosCosto,
+      conceptosGasto: conceptosGasto,
+      cuentasContables: cuentasContables,
+      importes: importes,
+      pimportes: pimportes,
+      isFormPosted: true,
+      isValid: Formz.validate([
+        proveedor,
+        ruc,
+        tipoDocumento,
+        numeroDocumento,
+        fechaEmision,
+        subTotal,
+        igv,
+        moneda,
+        ...centrosCosto,
+        ...conceptosGasto,
+        ...cuentasContables,
+        ...importes,
+        ...pimportes,
+      ]),
+    );
   }
 }
 
@@ -470,11 +551,11 @@ class GastoFormState {
   final SubTotal subTotal;
   final Igv igv;
   final MoneyType moneda;
-  final CentroCosto centroCosto;
-  final ConceptoGasto conceptoGasto;
-  final CuentaContable cuentaContable;
-  final Importe importe;
-  final Pimporte pimporte;
+  final List<CentroCosto> centrosCosto;
+  final List<ConceptoGasto> conceptosGasto;
+  final List<CuentaContable> cuentasContables;
+  final List<Importe> importes;
+  final List<Pimporte> pimportes;
   final List<String> images;
 
   GastoFormState(
@@ -490,11 +571,11 @@ class GastoFormState {
       this.subTotal = const SubTotal.pure(),
       this.igv = const Igv.pure(),
       this.moneda = const MoneyType.pure(),
-      this.centroCosto = const CentroCosto.pure(),
-      this.conceptoGasto = const ConceptoGasto.pure(),
-      this.cuentaContable = const CuentaContable.pure(),
-      this.importe = const Importe.pure(),
-      this.pimporte = const Pimporte.pure(),
+      this.centrosCosto = const [CentroCosto.pure()],
+      this.conceptosGasto = const [ConceptoGasto.pure()],
+      this.cuentasContables = const [CuentaContable.pure()],
+      this.importes = const [Importe.pure()],
+      this.pimportes = const [Pimporte.pure()],
       this.images = const []});
 
   GastoFormState copyWith(
@@ -510,11 +591,11 @@ class GastoFormState {
           SubTotal? subTotal,
           Igv? igv,
           MoneyType? moneda,
-          CentroCosto? centroCosto,
-          ConceptoGasto? conceptoGasto,
-          CuentaContable? cuentaContable,
-          Importe? importe,
-          Pimporte? pimporte,
+          List<CentroCosto>? centrosCosto,
+          List<ConceptoGasto>? conceptosGasto,
+          List<CuentaContable>? cuentasContables,
+          List<Importe>? importes,
+          List<Pimporte>? pimportes,
           List<String>? images}) =>
       GastoFormState(
           isPosting: isPosting ?? this.isPosting,
@@ -529,11 +610,11 @@ class GastoFormState {
           subTotal: subTotal ?? this.subTotal,
           igv: igv ?? this.igv,
           moneda: moneda ?? this.moneda,
-          centroCosto: centroCosto ?? this.centroCosto,
-          conceptoGasto: conceptoGasto ?? this.conceptoGasto,
-          cuentaContable: cuentaContable ?? this.cuentaContable,
-          importe: importe ?? this.importe,
-          pimporte: pimporte ?? this.pimporte,
+          centrosCosto: centrosCosto ?? this.centrosCosto,
+          conceptosGasto: conceptosGasto ?? this.conceptosGasto,
+          cuentasContables: cuentasContables ?? this.cuentasContables,
+          importes: importes ?? this.importes,
+          pimportes: pimportes ?? this.pimportes,
           images: images ?? this.images);
 
   @override
@@ -553,11 +634,11 @@ class GastoFormState {
         subTotal: ${subTotal.value}
         igv: ${igv.value}
         moneda: ${moneda.value}
-        centroCosto: ${centroCosto.value}
-        conceptoGasto: ${conceptoGasto.value}
-        cuentaContable: ${cuentaContable.value}
-        importe: ${importe.value}
-        pImporte: ${pimporte.value}
+        centroCosto: ${centrosCosto.map((e) => "${e.value}")}
+        conceptoGasto: ${conceptosGasto.map((e) => "${e.value}")}
+        cuentaContable: ${cuentasContables.map((e) => "${e.value}")}
+        importe: ${importes.map((e) => "${e.value}")}
+        pImporte: ${pimportes.map((e) => "${e.value}")}
     ''';
   }
 }

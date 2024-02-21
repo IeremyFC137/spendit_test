@@ -1,5 +1,6 @@
 import 'package:spendit_test/features/gastos/domain/entities/entities.dart';
 import '../../../shared/shared.dart';
+import 'gasto_detalles_mapper.dart';
 
 class GastoMapper {
   static gastoJsonToEntity(Map<String, dynamic> json) => Gasto(
@@ -12,12 +13,12 @@ class GastoMapper {
       fechaEmision: DateTime.parse(json["fecha_emision"]),
       subTotal: json["sub_total"],
       igv: json["igv"],
-      importe: json["importe"],
-      pImporte: json["p_importe"],
       moneda: parseMoneda(json["moneda"] as String)!,
-      cCosto: json["c_costo"],
-      cGasto: json["c_gasto"],
-      cContable: json["c_contable"],
+      detalles: (json["detalles"] as List)
+          .map((detalleJson) =>
+              GastoDetallesMapper.gastoDetalleJsonToEntity(detalleJson))
+          .cast<DetallesGasto>()
+          .toList(),
       estado: json["estado"],
       images: List<String>.from(json['imagenes'] ?? []));
 }
