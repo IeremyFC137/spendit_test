@@ -323,7 +323,7 @@ class _GastoForm extends ConsumerWidget {
                         SnackBar(
                           content: Text("Gasto registrado correctamente"),
                           backgroundColor: Colors.green,
-                          duration: Duration(seconds: 4),
+                          duration: Duration(seconds: 3),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -332,11 +332,18 @@ class _GastoForm extends ConsumerWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text("Error al registrar el gasto"),
-                          duration: Duration(seconds: 4),
+                          duration: Duration(seconds: 2),
                           backgroundColor: Colors.red,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(gastoForm.messageError),
+                        duration: Duration(seconds: 5),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ));
                     }
                   },
                 ),

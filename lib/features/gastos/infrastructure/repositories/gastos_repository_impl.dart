@@ -10,13 +10,21 @@ class GastosRepositoryImpl extends GastosRepository {
 
   @override
   Future<Gasto> editarGasto(
-      {required int gastoId, required List<DetallesGasto> detalles}) {
-    return datasource.editarGasto(gastoId: gastoId, detalles: detalles);
+      {required int gastoId,
+      required List<DetallesGasto> detalles,
+      List<int>? idsEliminar}) {
+    return datasource.editarGasto(
+        gastoId: gastoId, detalles: detalles, idsEliminar: idsEliminar);
   }
 
   @override
   Future<void> eliminarGasto(int gastoId) {
     return datasource.eliminarGasto(gastoId);
+  }
+
+  @override
+  Future<void> eliminarDetalleGasto(int detalleId) {
+    return datasource.eliminarDetalleGasto(detalleId);
   }
 
   @override

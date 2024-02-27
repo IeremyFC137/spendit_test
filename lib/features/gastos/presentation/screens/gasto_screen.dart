@@ -17,17 +17,19 @@ class GastoScreen extends ConsumerWidget {
 
   const GastoScreen({super.key, required this.gastoId});
 
-  void showSnackbar(BuildContext context) {
+  void showSnackbar(
+      BuildContext context, String message, Color color, int seconds) {
     ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 4),
-        content: Text('Gasto actualizado')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: color,
+        duration: Duration(seconds: seconds),
+        content: Text(message)));
   }
 
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gastoState = ref.watch(gastoProvider(int.parse(gastoId)));
+
     GastoLike gastoLike = GastoLikeMapper.gastoToGastoLikeEntity(
         gastoState.gasto ??
             Gasto(
@@ -44,7 +46,9 @@ class GastoScreen extends ConsumerWidget {
                 moneda: Moneda.SOLES,
                 estado: '',
                 images: []));
+
     List<int> ids = gastoLike.detalles!.map((detalle) => detalle.id).toList();
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -85,8 +89,20 @@ class GastoScreen extends ConsumerWidget {
                   .read(gastoFormProvider(gastoLike).notifier)
                   .onFormActualizarSubmit(ids)
                   .then((value) {
-                if (!value) return;
-                showSnackbar(context);
+                if (!value) {
+                  if (ref.watch(gastoFormProvider(gastoLike)).isValid) {
+                    showSnackbar(
+                        context, "Error al actualizar el gasto", Colors.red, 2);
+                  } else {
+                    showSnackbar(
+                        context,
+                        ref.watch(gastoFormProvider(gastoLike)).messageError,
+                        Colors.red,
+                        5);
+                  }
+                } else {
+                  showSnackbar(context, 'Gasto actualizado', Colors.green, 3);
+                }
               });
             },
             child: const Icon(Icons.save_as_outlined)),
@@ -204,9 +220,9 @@ class _GastoInformation extends ConsumerWidget {
             children: [
               Text("Detalles",
                   style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  )),
+                      fontSize: 18,
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold)),
               SizedBox(
                 width: 5,
               ),
@@ -244,53 +260,60 @@ class _GastoInformation extends ConsumerWidget {
           ),
           /*Fin detalles actualizar*/
           const SizedBox(height: 10),
-          Center(
-            child: CustomFilledButton(
-              onPressed: () async {
-                final responseSunat = await ref
-                    .read(gastosProvider.notifier)
-                    .validarGastoConSunat(gastoLike);
+          Visibility(
+            visible: gastoLike.documento!.isNotEmpty &&
+                ['F', 'B', 'E', 'R']
+                    .contains(gastoLike.documento![0].toUpperCase()),
+            maintainSize: false,
+            maintainAnimation: true,
+            maintainState: true,
+            child: Column(children: [
+              Center(
+                child: CustomFilledButton(
+                  onPressed: () async {
+                    final responseSunat = await ref
+                        .read(gastosProvider.notifier)
+                        .validarGastoConSunat(gastoLike);
 
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Resultado de Validación con SUNAT'),
-                      content: SingleChildScrollView(
-                        child: ListBody(
-                          children: <Widget>[
-                            Text('RUC: ${gastoLike.ruc}'),
-                            Text(
-                                'Resultado: ${obtenerResultado(responseSunat?.estadoCp ?? 'NOT FOUND')}'),
-                            Text(
-                                'Estado: ${obtenerEstado(responseSunat?.estadoRuc ?? 'NOT FOUND')}'),
-                            Text(
-                                'Condicion: ${obtenerCondicion(responseSunat?.condDomiRuc ?? 'NOT FOUND')}'),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Resultado de Validación con SUNAT'),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: <Widget>[
+                                Text('RUC: ${gastoLike.ruc}'),
+                                Text(
+                                    'Resultado: ${obtenerResultado(responseSunat?.estadoCp ?? 'NOT FOUND')}'),
+                                Text(
+                                    'Estado: ${obtenerEstado(responseSunat?.estadoRuc ?? 'NOT FOUND')}'),
+                                Text(
+                                    'Condicion: ${obtenerCondicion(responseSunat?.condDomiRuc ?? 'NOT FOUND')}'),
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cerrar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
                           ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text('Cerrar'),
-                          onPressed: () {
-                            Navigator.of(context)
-                                .pop(); // Cierra el AlertDialog
-                          },
-                        ),
-                      ],
+                        );
+                      },
                     );
                   },
-                );
-              },
-              text: "Validar con SUNAT",
-              buttonColor: colors.primary, // Ajusta según tu esquema de color
-              isLoading: ref
-                  .watch(gastosProvider)
-                  .isLoading, // Controla este estado según necesites
-              icon: FaIcon(FontAwesomeIcons.squareCheck), // Ícono FontAwesome
-            ),
+                  text: "Validar con SUNAT",
+                  buttonColor: colors.primary,
+                  isLoading: ref.watch(gastosProvider).isLoading,
+                  icon: FaIcon(FontAwesomeIcons.squareCheck),
+                ),
+              ),
+              const SizedBox(height: 100),
+            ]),
           ),
-          const SizedBox(height: 100),
         ],
       ),
     );

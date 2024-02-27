@@ -42,13 +42,13 @@ class GastosNotifier extends StateNotifier<GastosState> {
         gastos: [...state.gastos, ...gastos]);
   }
 
-  Future<bool> editarGasto(
-      int gastoId, List<DetallesGasto> detallesActualizados) async {
+  Future<bool> editarGasto(int gastoId,
+      List<DetallesGasto> detallesActualizados, List<int>? idsEliminar) async {
     try {
       final Gasto gastoActualizado = await gastosRepository.editarGasto(
-        gastoId: gastoId,
-        detalles: detallesActualizados,
-      );
+          gastoId: gastoId,
+          detalles: detallesActualizados,
+          idsEliminar: idsEliminar);
 
       final int index = state.gastos.indexWhere((gasto) => gasto.id == gastoId);
       if (index != -1) {
@@ -130,6 +130,15 @@ class GastosNotifier extends StateNotifier<GastosState> {
       await gastosRepository.eliminarGasto(gastoId);
       state = state.copyWith(
           gastos: state.gastos.where((gasto) => gasto.id != gastoId).toList());
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
+
+  Future<void> eliminarDetalleGasto(int detalleId) async {
+    try {
+      await gastosRepository.eliminarDetalleGasto(detalleId);
     } catch (e) {
       print(e);
       throw Exception(e);

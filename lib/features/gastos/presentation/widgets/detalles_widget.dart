@@ -1,10 +1,12 @@
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 import '../../domain/domain.dart';
 import '../providers/providers.dart';
 import 'package:flutter/material.dart';
 
 import 'detalle_section_widget.dart';
 
-class DetallesWidget extends StatelessWidget {
+class DetallesWidget extends StatefulWidget {
   final GastoFormState gastoFormState;
   final List<String> listCcosto;
   final Function(int, String) onCentroCostoChanged;
@@ -27,42 +29,78 @@ class DetallesWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final detalle = formarListaDetalles(gastoFormState);
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.87,
-      child: PageView.builder(
-        itemCount: gastoFormState.centrosCosto.length,
-        itemBuilder: (context, index) {
-          return DetalleSectionWidget(
-            index: index,
-            detalle: detalle[index],
-            removeDetalle: removeDetalle,
-            listCcosto: listCcosto,
-            onCentroCostoChanged: onCentroCostoChanged,
-            onConceptoGastoChanged: onConceptoGastoChanged,
-            onCuentaContableChanged: onCuentaContableChanged,
-            onImporteChanged: onImporteChanged,
-            onPImporteChanged: onPImporteChanged,
-            errorMessageCcosto: gastoFormState.isFormPosted
-                ? gastoFormState.centrosCosto[index].errorMessage
-                : null,
-            errorMessageCgasto: gastoFormState.isFormPosted
-                ? gastoFormState.conceptosGasto[index].errorMessage
-                : null,
-            errorMessageCcontable: gastoFormState.isFormPosted
-                ? gastoFormState.cuentasContables[index].errorMessage
-                : null,
-            errorMessageImporte: gastoFormState.isFormPosted
-                ? gastoFormState.importes[index].errorMessage
-                : null,
-            errorMessagePimporte: gastoFormState.isFormPosted
-                ? gastoFormState.pimportes[index].errorMessage
-                : null,
-          );
-        },
-      ),
+  State<DetallesWidget> createState() => _DetallesWidgetState();
+}
+
+class _DetallesWidgetState extends State<DetallesWidget> {
+  final PageController _pageController = PageController();
+  int _activeIndex = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _animateToSlide(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 400),
+      curve: Curves.easeIn,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detalles = formarListaDetalles(widget.gastoFormState);
+    final colors = Theme.of(context).colorScheme;
+
+    return Column(children: [
+      AnimatedSmoothIndicator(
+        activeIndex: _activeIndex,
+        count: detalles.length,
+        onDotClicked: _animateToSlide,
+        effect: JumpingDotEffect(activeDotColor: colors.primary),
+      ),
+      Container(
+        height: MediaQuery.of(context).size.height * 0.87,
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: detalles.length,
+          itemBuilder: (context, index) {
+            return DetalleSectionWidget(
+              index: index,
+              detalle: detalles[index],
+              removeDetalle: widget.removeDetalle,
+              listCcosto: widget.listCcosto,
+              onCentroCostoChanged: widget.onCentroCostoChanged,
+              onConceptoGastoChanged: widget.onConceptoGastoChanged,
+              onCuentaContableChanged: widget.onCuentaContableChanged,
+              onImporteChanged: widget.onImporteChanged,
+              onPImporteChanged: widget.onPImporteChanged,
+              errorMessageCcosto: widget.gastoFormState.isFormPosted
+                  ? widget.gastoFormState.centrosCosto[index].errorMessage
+                  : null,
+              errorMessageCgasto: widget.gastoFormState.isFormPosted
+                  ? widget.gastoFormState.conceptosGasto[index].errorMessage
+                  : null,
+              errorMessageCcontable: widget.gastoFormState.isFormPosted
+                  ? widget.gastoFormState.cuentasContables[index].errorMessage
+                  : null,
+              errorMessageImporte: widget.gastoFormState.isFormPosted
+                  ? widget.gastoFormState.importes[index].errorMessage
+                  : null,
+              errorMessagePimporte: widget.gastoFormState.isFormPosted
+                  ? widget.gastoFormState.pimportes[index].errorMessage
+                  : null,
+            );
+          },
+          onPageChanged: (index) {
+            setState(() => _activeIndex = index);
+          },
+        ),
+      ),
+    ]);
   }
 }
 

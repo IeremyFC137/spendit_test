@@ -14,6 +14,8 @@ final gastoFormProvider = StateNotifierProvider.autoDispose
       ref.watch(gastosProvider.notifier).registrarGasto;
   final gastoActualizarCallback =
       ref.watch(gastosProvider.notifier).editarGasto;
+  final eliminarDetalleGasto =
+      ref.watch(gastosProvider.notifier).eliminarDetalleGasto;
   final user = ref.watch(authProvider).user;
   final listCampoDetalle = ref.read(gastosProvider).campoDetalle;
   return GastoFormNotifier(
@@ -21,19 +23,23 @@ final gastoFormProvider = StateNotifierProvider.autoDispose
       gastoActualizarCallback: gastoActualizarCallback,
       user: user,
       listCampoDetalle: listCampoDetalle,
-      gastoLike: gastoLike);
+      gastoLike: gastoLike,
+      eliminarDetalleGasto: eliminarDetalleGasto);
 });
 
 class GastoFormNotifier extends StateNotifier<GastoFormState> {
   final Function gastoRegistrarCallback;
   final Function gastoActualizarCallback;
+  final Function eliminarDetalleGasto;
   final User? user;
+  final GastoLike? gastoLike;
   final List listCampoDetalle;
   GastoFormNotifier(
       {required this.gastoRegistrarCallback,
+      required this.eliminarDetalleGasto,
       required this.user,
       required this.listCampoDetalle,
-      GastoLike? gastoLike,
+      this.gastoLike,
       required this.gastoActualizarCallback})
       : super(GastoFormState(
             id: gastoLike?.id,
@@ -50,9 +56,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
             subTotal: SubTotal.dirty(gastoLike?.subTotal ?? 0.0),
             igv: Igv.dirty(gastoLike?.igv ?? 0.0),
             moneda: MoneyType.dirty(gastoLike?.moneda ?? Moneda.SOLES),
-            centrosCosto: gastoLike?.detalles
-                    ?.map((d) => CentroCosto.dirty(d.cCosto))
-                    .toList() ??
+            centrosCosto: gastoLike?.detalles?.map((d) => CentroCosto.dirty(d.cCosto)).toList() ??
                 [CentroCosto.pure()],
             conceptosGasto: gastoLike?.detalles
                     ?.map((d) => ConceptoGasto.dirty(d.cGasto))
@@ -79,6 +83,15 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   void removeDetalle(int index) {
+    if (gastoLike?.detalles != null && index < gastoLike!.detalles!.length) {
+      final gastoDetalleId = gastoLike!.detalles![index].id;
+      if (!state.idsEliminados!.contains(gastoDetalleId)) {
+        final updatedIdsEliminados = List<int>.from(state.idsEliminados!)
+          ..add(gastoDetalleId);
+        state = state.copyWith(idsEliminados: updatedIdsEliminados);
+      }
+    }
+
     if (state.centrosCosto.length > 1) {
       state = state.copyWith(
         centrosCosto: List.from(state.centrosCosto)..removeAt(index),
@@ -87,6 +100,15 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
         importes: List.from(state.importes)..removeAt(index),
         pimportes: List.from(state.pimportes)..removeAt(index),
       );
+    }
+  }
+
+  void removeDetalleApi(int gastoId) async {
+    try {
+      await eliminarDetalleGasto(gastoId);
+    } catch (e) {
+      print(e);
+      throw Exception(e);
     }
   }
 
@@ -345,7 +367,17 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
     );
   }
 
-  void onImportesChange(int index, double value) {
+  onImportesChange(int index, double value) {
+    final total = state.subTotal.value + state.igv.value;
+    if (state.subTotal.value != 0 && state.igv.value != 0) {
+      final double newPImporte =
+          double.parse((value / total).toStringAsFixed(2));
+      final List<Pimporte> updatedPimportes =
+          List<Pimporte>.from(state.pimportes)
+            ..[index] = Pimporte.dirty(newPImporte);
+      state = state.copyWith(pimportes: updatedPimportes);
+    }
+
     final List<Importe> updatedImportes = List<Importe>.from(state.importes);
     updatedImportes[index] = Importe.dirty(value);
 
@@ -372,6 +404,14 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   onPimportesChange(int index, double value) {
+    final total = state.subTotal.value + state.igv.value;
+    if (state.subTotal.value != 0 && state.igv.value != 0) {
+      final double newImporte = total * value;
+      final List<Importe> updatedImportes = List<Importe>.from(state.importes)
+        ..[index] = Importe.dirty(newImporte);
+      state = state.copyWith(importes: updatedImportes);
+    }
+
     final List<Pimporte> updatedPimportes =
         List<Pimporte>.from(state.pimportes);
     updatedPimportes[index] = Pimporte.dirty(value);
@@ -403,11 +443,43 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   Future<bool> onFormActualizarSubmit(List<int> ids) async {
+    for (int i = 0; i < state.centrosCosto.length; i++) {
+      bool esCentroCostoValido =
+          listCampoDetalle.contains(state.centrosCosto[i].value);
+      if (!esCentroCostoValido) {
+        _touchEveryField();
+        state = state.copyWith(
+            isValid: false,
+            messageError: 'El formulario presenta campos invalidos');
+        return false;
+      }
+    }
+
+    final double total = state.subTotal.value + state.igv.value;
+    final double sumImportes = state.importes.fold(
+      0.0,
+      (previousValue, element) => previousValue + element.value,
+    );
+
+    if (sumImportes != total) {
+      state = state.copyWith(
+          isValid: false,
+          messageError: "La suma de los importes no coincide con el total");
+      return false;
+    }
+
     _touchEveryField();
 
     if (!state.isValid) return false;
 
     state = state.copyWith(isPosting: true);
+
+    int centrosCostoLength = state.centrosCosto.length;
+    int diferenciaSize = centrosCostoLength - ids.length;
+
+    if (diferenciaSize > 0) {
+      ids.addAll(List.filled(diferenciaSize, 0));
+    }
 
     List<DetallesGasto> detallesActualizados = List.generate(
       state.centrosCosto.length,
@@ -429,9 +501,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
       }
 
       bool isSuccess = await gastoActualizarCallback(
-        state.id!,
-        detallesActualizados,
-      );
+          state.id!, detallesActualizados, state.idsEliminados);
 
       state = state.copyWith(isPosting: false);
       return isSuccess;
@@ -443,6 +513,31 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
   }
 
   Future<bool> onFormSubmit() async {
+    for (int i = 0; i < state.centrosCosto.length; i++) {
+      bool esCentroCostoValido =
+          listCampoDetalle.contains(state.centrosCosto[i].value);
+      if (!esCentroCostoValido) {
+        _touchEveryField();
+        state = state.copyWith(
+            isValid: false,
+            messageError: 'El formulario presenta campos invalidos');
+        return false;
+      }
+    }
+
+    final double total = state.subTotal.value + state.igv.value;
+    final double sumImportes = state.importes.fold(
+      0.0,
+      (previousValue, element) => previousValue + element.value,
+    );
+
+    if (sumImportes != total) {
+      state = state.copyWith(
+          isValid: false,
+          messageError: "La suma de los importes no coincide con el total");
+      return false;
+    }
+
     _touchEveryField();
 
     if (!state.isValid) {
@@ -453,7 +548,7 @@ class GastoFormNotifier extends StateNotifier<GastoFormState> {
 
     DateTime? fechaEmisionParsed = parseFechaEmision(state.fechaEmision.value);
     if (fechaEmisionParsed == null) {
-      print("Fecha de emisión no es válida o está en un formato incorrecto.");
+      print("Fecha de emisión no es válida o está en un formato incorrecto");
       state = state.copyWith(isPosting: false);
       return false;
     }
@@ -543,6 +638,7 @@ class GastoFormState {
   final bool isFormPosted;
   final bool isValid;
   final int? id;
+  final String messageError;
   final Proveedor proveedor;
   final Ruc ruc;
   final DocumentType tipoDocumento;
@@ -557,12 +653,14 @@ class GastoFormState {
   final List<Importe> importes;
   final List<Pimporte> pimportes;
   final List<String> images;
+  final List<int>? idsEliminados;
 
   GastoFormState(
       {this.isPosting = false,
       this.isFormPosted = false,
       this.isValid = false,
       this.id,
+      this.messageError = 'El formulario presenta campos invalidos',
       this.proveedor = const Proveedor.pure(),
       this.ruc = const Ruc.pure(),
       this.tipoDocumento = const DocumentType.pure(),
@@ -576,13 +674,15 @@ class GastoFormState {
       this.cuentasContables = const [CuentaContable.pure()],
       this.importes = const [Importe.pure()],
       this.pimportes = const [Pimporte.pure()],
-      this.images = const []});
+      this.images = const [],
+      this.idsEliminados = const []});
 
   GastoFormState copyWith(
           {bool? isPosting,
           bool? isFormPosted,
           bool? isValid,
           int? id,
+          String? messageError,
           Proveedor? proveedor,
           Ruc? ruc,
           DocumentType? tipoDocumento,
@@ -596,12 +696,14 @@ class GastoFormState {
           List<CuentaContable>? cuentasContables,
           List<Importe>? importes,
           List<Pimporte>? pimportes,
-          List<String>? images}) =>
+          List<String>? images,
+          List<int>? idsEliminados}) =>
       GastoFormState(
           isPosting: isPosting ?? this.isPosting,
           isFormPosted: isFormPosted ?? this.isFormPosted,
           isValid: isValid ?? this.isValid,
           id: id ?? this.id,
+          messageError: messageError ?? this.messageError,
           proveedor: proveedor ?? this.proveedor,
           ruc: ruc ?? this.ruc,
           tipoDocumento: tipoDocumento ?? this.tipoDocumento,
@@ -615,7 +717,8 @@ class GastoFormState {
           cuentasContables: cuentasContables ?? this.cuentasContables,
           importes: importes ?? this.importes,
           pimportes: pimportes ?? this.pimportes,
-          images: images ?? this.images);
+          images: images ?? this.images,
+          idsEliminados: idsEliminados ?? this.idsEliminados);
 
   @override
   String toString() {
@@ -639,6 +742,7 @@ class GastoFormState {
         cuentaContable: ${cuentasContables.map((e) => "${e.value}")}
         importe: ${importes.map((e) => "${e.value}")}
         pImporte: ${pimportes.map((e) => "${e.value}")}
+        idsEliminados: ${idsEliminados}
     ''';
   }
 }

@@ -18,44 +18,101 @@ class GastosDatasourceImpl extends GastosDatasource {
             headers: {'Authorization': 'Bearer $accessToken'}));
 
   @override
-  Future<Gasto> editarGasto({
-    required int gastoId,
-    required List<DetallesGasto> detalles,
-  }) async {
-    final detallesData = detalles
-        .map((detalle) => {
-              "detalleId": detalle.id,
-              "c_costo": detalle.cCosto,
-              "c_gasto": detalle.cGasto,
-              "c_contable": detalle.cContable,
-              "importe": detalle.importe,
-              "p_importe": detalle.pImporte,
-            })
-        .toList();
+  Future<Gasto> editarGasto(
+      {required int gastoId,
+      required List<DetallesGasto> detalles,
+      List<int>? idsEliminar}) async {
+    final detallesConIdCero =
+        detalles.where((detalle) => detalle.id == 0).toList();
+    final detallesConIdNoCero =
+        detalles.where((detalle) => detalle.id != 0).toList();
 
-    final Map<String, dynamic> data = {
-      'id': gastoId,
-      'detalles': detallesData,
-    };
-
-    try {
-      final response = await dio.put("/gastos", data: data);
-      final Gasto gasto = GastoMapper.gastoJsonToEntity(response.data);
-      return gasto;
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw GastoNotFound();
+    if (idsEliminar != null && idsEliminar.isNotEmpty) {
+      final Map<String, dynamic> data = {"ids": idsEliminar};
+      try {
+        await dio.delete("/gastos/detalles", data: data);
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 404) {
+          throw GastoNotFound();
+        }
+        throw Exception();
+      } catch (e) {
+        print(e);
+        throw Exception();
       }
-      throw Exception();
-    } catch (e) {
-      print(e);
-      throw Exception();
     }
+
+    if (detallesConIdCero.isNotEmpty) {
+      final detallesData = detallesConIdCero
+          .map((detalle) => {
+                "c_costo": detalle.cCosto,
+                "c_gasto": detalle.cGasto,
+                "c_contable": detalle.cContable,
+                "importe": detalle.importe,
+                "p_importe": detalle.pImporte,
+              })
+          .toList();
+
+      final Map<String, dynamic> data = {
+        'gastoId': gastoId,
+        'detalles': detallesData,
+      };
+
+      try {
+        await dio.post("/gastos/detalles", data: data);
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 404) {
+          throw GastoNotFound();
+        }
+        throw Exception();
+      } catch (e) {
+        print(e);
+        throw Exception();
+      }
+    }
+
+    if (detallesConIdNoCero.isNotEmpty) {
+      final detallesData = detallesConIdNoCero
+          .map((detalle) => {
+                "detalleId": detalle.id,
+                "c_costo": detalle.cCosto,
+                "c_gasto": detalle.cGasto,
+                "c_contable": detalle.cContable,
+                "importe": detalle.importe,
+                "p_importe": detalle.pImporte,
+              })
+          .toList();
+
+      final Map<String, dynamic> data = {
+        'id': gastoId,
+        'detalles': detallesData,
+      };
+
+      try {
+        final response = await dio.put("/gastos", data: data);
+        final Gasto gasto = GastoMapper.gastoJsonToEntity(response.data);
+        return gasto;
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 404) {
+          throw GastoNotFound();
+        }
+        throw Exception();
+      } catch (e) {
+        print(e);
+        throw Exception();
+      }
+    }
+    throw Exception('No hay gasto para actualizar.');
   }
 
   @override
   Future<void> eliminarGasto(int gastoId) async {
     await dio.delete("/gastos/${gastoId}");
+  }
+
+  @override
+  Future<void> eliminarDetalleGasto(int detalleId) async {
+    await dio.delete("/gastos/detalle/${detalleId}");
   }
 
   @override
@@ -130,7 +187,6 @@ class GastosDatasourceImpl extends GastosDatasource {
 
     final response = await dio.post("/scanit", data: formData);
     if (response.statusCode == 200) {
-      // Asume que tienes una función que convierte json a GastoLike
       GastoLike gastoLike =
           GastoLikeMapper.scanitJsonToGastoLikeEntity(response.data);
       return gastoLike;

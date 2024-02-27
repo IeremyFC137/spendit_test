@@ -17,10 +17,14 @@ abstract class GastosRepository {
 
   Future<void> eliminarGasto(int gastoId);
 
+  Future<void> eliminarDetalleGasto(int detalleId);
+
   Future<Gasto> getGastoById(int gastoId);
 
   Future<Gasto> editarGasto(
-      {required int gastoId, required List<DetallesGasto> detalles});
+      {required int gastoId,
+      required List<DetallesGasto> detalles,
+      List<int>? idsEliminar});
 
   Future<List<Gasto>> listarGastos({int size = 7, int page = 0});
 
